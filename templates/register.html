@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='register.css')}}">
+    <title>Put App Title here</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome!  Sign in.</h1>
+        <div class="d-inline-block mb-3 border border-primary p-3" id="register">
+            <form action="/register" method="POST">
+                <legend>Registration</legend>
+                <fieldset>
+                    {% with messages = get_flashed_messages(category_filter=["registration"]) %}     <!-- declare a variable called messages -->
+                        {% if messages %}                            <!-- check if there are any messages -->
+                            {% for message in messages %}            <!-- loop through the messages -->
+                                <p class="text-danger">{{message}}</p>                   <!-- display each message in a paragraph tag -->
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    <label for="fname">First Name: </label>
+                    <input type="text" name="first_name" id="fname">
+                </fieldset>
+                <fieldset>
+                    <label for="lname">Last Name: </label>
+                    <input type="text" name="last_name" id="lname">
+                </fieldset>
+                <fieldset>
+                    <label for="email">Email: </label>
+                    <input type="email" name="email_address" id="email">
+                </fieldset>
+                <fieldset>
+                    <label for="pwd">Password:</label>
+                    <input type="password" name="password" id="pwd">
+                </fieldset>
+                <fieldset>
+                    <label for="conf_pwd">Confirm Password:</label>
+                    <input type="password" name="confirm_password" id="conf_pwd">
+                </fieldset>
+                <input class="button" type="submit" value="Register">
+            </form>
+        </div>
+        <div class="d-inline-block mb-3 border border-primary p-3" id="login">
+            <form action="/login" method="POST">
+                <legend>Login</legend>
+                    {% with messages = get_flashed_messages(category_filter=["login"]) %}     <!-- declare a variable called messages -->
+                        {% if messages %}                            <!-- check if there are any messages -->
+                            {% for message in messages %}            <!-- loop through the messages -->
+                                <p class="text-danger">{{message}}</p>                   <!-- display each message in a paragraph tag -->
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                <fieldset>
+                    <label for="lemail">Email: </label>
+                    <input type="email" name="email_address" id="lemail">
+                </fieldset>
+                <fieldset>
+                    <label for="lpwd">Password:</label>
+                    <input type="password" name="password" id="lpwd">
+                </fieldset>
+                <input class="button" type="submit" value="Login">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

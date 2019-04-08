@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- bootstrap css cdn -->
+    <!-- <link rel="stylesheet"href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"> -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- bootstrap js cdn -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+    <title>PhotoBomb! Dashboard</title>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="header" >
+            <img class="img-thumbnail" src="../static/camera-icon-th.png" alt="PhotoBomb! logo">
+            <h1 class="d-inline-block">PhotoBomb!</h1>
+            <input class="ml-5 b4-s" type="text" name="search">
+            <div class="input-group-btn d-inline-block">
+                <button class="btn btn-default shadow" type="submit">Search</button>
+            </div>
+            <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light"> -->
+            <a class="ml-2" href="#">Create</a>
+            <form class="d-inline-block" action="/upload" method="POST" enctype = "multipart/form-data">
+                <input type="file" name="new_pic">
+                <input type="submit" value="Upload">
+            </form>
+            <img src="" alt="User profile pic">
+            <!-- </nav> -->
+        </div>
+        <div id="side_nav">
+
+        </div>
+        <div id="albums">
+            {% for album in albums %}
+                <div class="d-inline-block">
+                    <p>{{album.name}}</p>
+                    {% for picture in album.pictures %}
+                        <a href="/photos/{{picture.id}}"><img class="img-thumbnail" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}"></a> 
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

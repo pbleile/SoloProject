@@ -4,11 +4,15 @@ from flask import flash
 from config import bcrypt, EMAIL_REGEX,db
 from sqlalchemy.sql import func, and_,or_
 
+def rankDefault(context):
+    return context.get_current_parameters()['picture_id']
+
 album_has_pictures=db.Table('album_has_pictures',
     db.Column('picture_id',db.Integer,db.ForeignKey('pictures.id',ondelete="cascade"),primary_key=True),
     db.Column('album_id'  ,db.Integer,db.ForeignKey('albums.id'  ,ondelete="cascade"),primary_key=True),
     db.Column('created_at',db.DateTime, server_default=func.now()),
-    db.Column('updated_at',db.DateTime, server_default=func.now(), onupdate=func.now())
+    db.Column('updated_at',db.DateTime, server_default=func.now(), onupdate=func.now()),
+    db.Column('rank',db.Integer, default=rankDefault)
     )
 
 class Picture(db.Model):
@@ -28,6 +32,11 @@ class Picture(db.Model):
         db.session.add(new_pic)
         db.session.commit()
         return new_pic
+    @classmethod
+    def delete(cls,picture_id):
+        pic=Picture.query.get(picture_id)
+        db.session.delete(pic)
+        db.session.commit()
 
 class Album(db.Model):
     __tablename__="albums"
@@ -40,10 +49,14 @@ class Album(db.Model):
     pictures=db.relationship('Picture',secondary=album_has_pictures)
     user=db.relationship('User',foreign_keys=[user_id],backref=db.backref("albums",cascade="all,delete-orphan"))
     @classmethod
-    def new(cls,user_id,name):
-        new_album=Album(user_id=user_id,name=name)
-        db.session.add(new_album)
-        db.session.commit()
+    def new(cls,user_id,name,description=""):
+        new_album=Album(user_id=user_id,name=name,description=description)
+        if len(name)>1:
+            db.session.add(new_album)
+            db.session.commit()
+            return None
+        else:
+            return new_album
     @classmethod
     def get_for_user(cls,user_id):
         user=User.query.get(user_id)
@@ -54,8 +67,11 @@ class Album(db.Model):
         active_album=cls.query.filter(cls.user_id==user.id,cls.id==user.active_album).first()
         return active_album
     @classmethod
-    def add_pic(cls,user,picture):
-        album=Album.get_active(user)
+    def add_pic(cls,user,picture,album_id):
+        if not album_id:
+            album=Album.get_active(user)
+        else:
+            album=Album.query.get(album_id)
         album.pictures.append(picture)
         db.session.commit()
 
@@ -70,18 +86,28 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
     active_album = db.Column(db.Integer)
-
+    profile_picture=db.Column(db.Integer,default=0)
+    def set_active_album(self,album_id):
+        self.active_album=album_id
+        db.session.commit()
+        return self
+    def update_email(self,new_email):
+        self.email=new_email
+        db.session.commit()
+        return self
+    def update_profile_pic(self,pic_id):
+        self.profile_picture=pic_id
+        db.session.commit()
+        return self
     @classmethod
     def get_existing(cls,first_name,last_name):
         user=cls.query.filter_by(first_name=first_name, last_name=last_name).all()
         return user
-
     @classmethod
     def get_session_key(cls,user_id):
         user=cls.query.get(user_id)
         session_key=bcrypt.generate_password_hash(str(user.created_at))
         return session_key
-
     @classmethod
     def validate_new(cls,form):
         errors=[]
@@ -102,7 +128,6 @@ class User(db.Model):
         if (existing_users)>0:
             errors.append(("This email address is currently in use by another user!",'registration'))
         return errors
-
     @classmethod
     def register_new(cls,form):
         hashed_pwd=bcrypt.generate_password_hash(form['password'])
@@ -110,7 +135,6 @@ class User(db.Model):
         db.session.add(new_user)
         db.session.commit()
         return new_user.id
-
     @classmethod
     def validate_login(cls,form):
         user=cls.query.filter_by(email=form['email_address']).first()
@@ -119,7 +143,6 @@ class User(db.Model):
             if bcrypt.check_password_hash(user.password,form['password']):
                 return user
         return None
-
     @classmethod
     def is_logged_in(cls,user_id,login_session):
         user=cls.query.get(user_id)
@@ -128,7 +151,6 @@ class User(db.Model):
             if bcrypt.check_password_hash(login_session,str(user.created_at)):
                 result=True
         return result
-
     @classmethod
     def is_logged_in_as_admin(cls,admin_id,login_session):
         user=cls.query.get(admin_id)
@@ -139,32 +161,27 @@ class User(db.Model):
                     print("admin login_success")
                     result=True
         return result
-
     @classmethod
     def get_one(cls,user_id):
         user=cls.query.get(user_id)
         return user
-
     @classmethod
     def remove(cls,user_id):
         user=cls.query.get(user_id)
         db.session.delete(user)
         db.session.commit()
-
     @classmethod
     def make_admin_level(cls,user_id):
         user=cls.query.get(user_id)
         user.user_level=9
         db.session.update(user)
         db.session.commit()
-
     @classmethod
     def make_user_level(cls,user_id):
         user=cls.query.get(user_id)
         user.user_level=0
         db.session.update(user)
         db.session.commit()
-
     @classmethod
     def get_all(cls):
         users=cls.query.all()

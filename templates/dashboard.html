@@ -4,45 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
     <!-- bootstrap css cdn -->
-    <!-- <link rel="stylesheet"href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"> -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <!-- bootstrap js cdn -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        .nav-thumbnail{
+            height: 50px;
+        }
+        .img-thumbnail{
+            height: 100px;
+        }
+        .dropdown-menu{
+            width: 300px;
+        }
+        .album{
+            min-height: 172px;
+            vertical-align: top;
+        }
+        .active_album{
+            background-image: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(108, 110, 145));
+        }
+    </style>
+    <script>
+        $(function(){
+            $('#albums').on('click','.album',function(){
+                console.log("album click")
+                $('.active_album').removeClass('active_album');
+                $(this).addClass('active_album');
+                $("#active_album_input").val($(this).attr("album_id"));
+                let file_count=$('.custom-file-input')[0].files.length;
+                if (file_count){
+                    $("#file_upload_label").text(file_count+" to upload to "+$(this).children('p').text());
+                } else {
+                    $("#file_upload_label").text("Upload to "+$(this).children('p').text());
+                }
+            })
+            $('.custom-file-input').change(function(){
+                console.log($(this)[0].files.length);
+                //$("label[for='inputGroupFile03']").text($(this)[0].files.length+' files selected');
+                $("#file_upload_label").text($(this)[0].files.length+" to upload to "+$(".active_album").children('p').text());
+            })
+        })
+    </script>
     <title>PhotoBomb! Dashboard</title>
 </head>
 <body>
-    <div id="wrapper">
+    <div id="wrapper" class="mx-3">
         <div id="header" >
-            <img class="img-thumbnail" src="../static/camera-icon-th.png" alt="PhotoBomb! logo">
+            <img class="nav-thumbnail" src="../static/camera-icon-th.png" alt="PhotoBomb! logo">
             <h1 class="d-inline-block">PhotoBomb!</h1>
-            <input class="ml-5 b4-s" type="text" name="search">
+            <input class="ml-5 b4-s shadow" type="text" name="search">
             <div class="input-group-btn d-inline-block">
                 <button class="btn btn-default shadow" type="submit">Search</button>
             </div>
             <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light"> -->
-            <a class="ml-2" href="#">Create</a>
+            <div class="dropdown d-inline">
+                <button class="btn shadow dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Create New Album
+                </button>
+                <div class="dropdown-menu" >
+                    <form class="px-4 py-3" action="/create_album" method="POST">
+                        <div class="form-group">
+                            <label for="new_album">Create Album</label>
+                            <input type="text" name="name" class="form-control" id="album_name" placeholder="Album Name" >
+                        </div>
+                        <div class="form-group">
+                            <label for="album_description">Description</label>
+                            <input type="text" name="description" class="form-control" id="album_description" placeholder="Put details here...">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </form>
+                </div>
+            </div>
+            <!-- File Upload Form -->
             <form class="d-inline-block" action="/upload" method="POST" enctype = "multipart/form-data">
-                <input type="file" name="new_pic">
-                <input type="submit" value="Upload">
+                <!-- <input type="file" name="new_pic" multiple="true" accept="image/*">
+                <input class="btn shadow" type="submit" value="Upload"> -->
+                <input type="hidden" name="active_album" value="{{albums[0].user.active_album}}" id="active_album_input">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon03">Start Upload</button>
+                    </div>
+                    <div class="custom-file">
+                        <input type="file" name="new_pic" multiple accept="image/*" class="custom-file-input" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03">
+                        <label id="file_upload_label" class="custom-file-label" for="inputGroupFile03">Drop Pictures Here</label>
+                    </div>
+                </div>
             </form>
-            <img src="" alt="User profile pic">
+            <!-- <img class="nav-thumbnail" src="{{profile_pic}}" alt="User profile pic"> -->
+            <!-- Change User Details Form -->
+            <div class="dropdown d-inline">
+                <img class="nav-thumbnail dropdown-toggle" src="{{profile_pic}}" alt="User profile pic" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="dropdown-menu">
+                    <form class="px-4 py-3" action="/update_profile" method="POST" enctype="multipart/form-data">
+                        <p>{{session['user_name']}}</p>
+                        <div class="form-group">
+                            <label for="change_email">Change Email address</label>
+                            <input type="email" class="form-control" id="change_email" placeholder="email@example.com" name="email_address" value="{{session['email_address']}}">
+                        </div>
+                        <div class="form-group">
+                            <label for="set_profile_pic">Set Profile Picture</label>
+                            <input type="file" name="profile_pic" accept="image/*" class="form-control" id="set_profile_pic">
+                            <!-- <input type="file" name="new_pic" multiple accept="image/*" class="custom-file-input" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03"> -->
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/logout">Logout</a>
+                </div>
+            </div>
             <!-- </nav> -->
         </div>
+
+        <hr>
         <div id="side_nav">
 
         </div>
         <div id="albums">
             {% for album in albums %}
-                <div class="d-inline-block">
+                {% set active_album="" %}
+                {% if album.user.active_album==album.id: %}
+                    {% set active_album="active_album" %}
+                {% endif %}
+                <div class="album d-inline-block shadow p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}">
                     <p>{{album.name}}</p>
                     {% for picture in album.pictures %}
-                        <a href="/photos/{{picture.id}}"><img class="img-thumbnail" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}"></a> 
+                        <a href="/photos/{{picture.id}}" draggable="true"><img class="img-thumbnail" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}" draggable="true"></a> 
                     {% endfor %}
                 </div>
             {% endfor %}
         </div>
     </div>
 </body>
+
 </html>

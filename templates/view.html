@@ -4,15 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .fa{
+            font-size:36px;
+        }
+        img{
+            height: 90vh;
+        }
+    </style>
     <title>PhotBomb!</title>
 </head>
 <body>
     <div id="wrapper">
         <div id="top_nav">
-
+            <a href="/dashboard"><i class="fa fa-arrow-circle-left"></i> Back</a>
+            <a href="/UserFiles/{{picture.file_path}}" download><i class="fa fa-cloud-download"></i> Download</a>
+            <a href=""><i class="fa fa-info-circle"></i>Info</a>
+            <a href="#"><i class="fa fa-star"></i> Favorite</a>
+            <a href="/delete/{{picture.id}}"><i class="	fa fa-trash"></i> Delete</a>
         </div>
+        <hr>
         <div>
-            <img src="" alt="">
+            <img src="/UserFiles/{{picture.file_path}}" alt="">
         </div>
     </div>
 </body>

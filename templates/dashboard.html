@@ -7,11 +7,16 @@
     
     <!-- bootstrap css cdn -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js" integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+    <!-- jQuery-ui -->
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <style>
         .nav-thumbnail{
             height: 50px;
@@ -28,6 +33,9 @@
         }
         .active_album{
             background-image: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(108, 110, 145));
+        }
+        .ui-sortable-placeholder{
+            vertical-align: top;
         }
     </style>
     <script>
@@ -49,6 +57,28 @@
                 //$("label[for='inputGroupFile03']").text($(this)[0].files.length+' files selected');
                 $("#file_upload_label").text($(this)[0].files.length+" to upload to "+$(".active_album").children('p').text());
             })
+
+            //be careful with this if using ajax to add new albums
+            $( ".sortable" ).sortable();
+            $( "#albums" ).on( "sortupdate",".sortable", function( event, ui ) {
+                console.log("New ordering");
+                //var sorted = $(this).sortable( "serialize", {key: "pic", attribute: "pictrue_id" } );
+                //console.log(sorted);
+                var sortedIDs = $(this ).sortable( "toArray",{attribute: "picture_id"} );
+                console.log($(this).attr("album_id"));
+                console.log(sortedIDs);
+                var album_order={
+                    album_id: $(this).attr("album_id"),
+                    ordering: sortedIDs
+                };
+                console.log(album_order);
+                console.log(JSON.stringify(album_order));
+                $.ajax({
+                    method:"POST",
+                    url:"/reorder_album",
+                    data: { json: JSON.stringify(album_order)}
+                });
+            } );
         })
     </script>
     <title>PhotoBomb! Dashboard</title>
@@ -133,9 +163,11 @@
                 {% endif %}
                 <div class="album d-inline-block shadow p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}">
                     <p>{{album.name}}</p>
+                    <ul class="sortable" album_id="{{album.id}}">
                     {% for picture in album.pictures %}
-                        <a href="/photos/{{picture.id}}" draggable="true"><img class="img-thumbnail" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}" draggable="true"></a> 
+                        <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                     {% endfor %}
+                    </ul>
                 </div>
             {% endfor %}
         </div>

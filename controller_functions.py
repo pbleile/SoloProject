@@ -1,9 +1,10 @@
-from flask import session,redirect,render_template,request,flash,send_from_directory
+from flask import session,redirect,render_template,request,flash,send_from_directory,jsonify,json
 from config import EMAIL_REGEX,bcrypt
-from models import User,Album,Picture,album_has_pictures
+from models import User,Album,Picture,album_has_pictures,Album_to_Pic
 import os,sys
 from werkzeug.utils import secure_filename
 import exifread
+import json
 
 def logout_user():
     session.clear()
@@ -177,17 +178,12 @@ def create_album():
 def update_profile():
     # need email validations
     user=User.get_one(session['MyWebsite_user_id'])
-    print(request.form)
     if user.email!=request.form['email_address']:
         user.update_email(request.form['email_address'])
-    print(request)
-    print(request.files)
     f=request.files['profile_pic']
-    print(f)
     filename=secure_filename(f.filename)
     ALLOWED_EXTENSIONS = ('bmp','png', 'jpg', 'jpeg', 'gif')
     if '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
-        print(filename)
         # Save pic to the filesystem
         f.save('UserFiles/'+user.email+'/'+filename)
         # Add pic to the pictures db
@@ -195,3 +191,21 @@ def update_profile():
         # set user's picture to what they just uploaded.
         user.update_profile_pic(pic.id)
     return redirect ('/dashboard')
+
+def reorder_album():
+    print("form:", request.form['json'])
+    # print(request.form['album_id'])
+    python_obj = json.loads(request.form['json'])
+    print("jSON:", json.loads(request.form['json']))
+    print(python_obj["album_id"])
+    print(python_obj["ordering"])
+    # print("jSON:", request.get_json(force=True))
+    album_order=Album_to_Pic()
+    for rank,picture_id in enumerate(python_obj["ordering"],1):
+        print(rank, picture_id)
+        record=album_order.get_one(python_obj["album_id"],picture_id)
+        record.rank=rank
+    album_order.commit()
+    print(album_order.get_order(python_obj["album_id"]))
+
+    return redirect('/dashboard')

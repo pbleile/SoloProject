@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask import flash
 from config import bcrypt, EMAIL_REGEX,db
 from sqlalchemy.sql import func, and_,or_
+from sqlalchemy.ext.automap import automap_base
 
 def rankDefault(context):
     return context.get_current_parameters()['picture_id']
@@ -14,6 +15,32 @@ album_has_pictures=db.Table('album_has_pictures',
     db.Column('updated_at',db.DateTime, server_default=func.now(), onupdate=func.now()),
     db.Column('rank',db.Integer, default=rankDefault)
     )
+# directly query album_has_pictures like this (returns a list of tuples [(1,),(2,)...(10,)]):
+# q=db.session.query(album_has_pictures.columns.rank).filter(album_has_pictures.columns.album_id==2).all()
+
+
+class Album_to_Pic:
+    Base = automap_base()
+    engine=db.session.get_bind()
+    Base.prepare(engine, reflect=True)
+    table=Base.classes.album_has_pictures
+    def __init__(self):
+        pass
+    def get_all(self):
+        return db.session.query(self.table).all()
+    def get_by_album(self,album_id):
+        # return db.session.query(self.table).filter(self.table.album_id==album_id).all()
+        return db.session.query(Picture).join(self.table,self.table.picture_id==Picture.id).filter(self.table.album_id==2).order_by(self.table.rank).all()
+    def get_one(self,album_id,picture_id):
+        return db.session.query(self.table).filter(self.table.album_id==album_id).filter(self.table.picture_id==picture_id).first()
+    def commit(self):
+        db.session.commit()
+    def get_order(self, album_id):
+        table=db.session.query(self.table).filter(self.table.album_id==album_id).order_by(self.table.rank).all()
+        picture_id_order=[]
+        for record in table:
+            picture_id_order.append(record.picture_id)
+        return picture_id_order
 
 class Picture(db.Model):
     __tablename__="pictures"
@@ -46,8 +73,14 @@ class Album(db.Model):
     description=db.Column(db.Text)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
-    pictures=db.relationship('Picture',secondary=album_has_pictures)
+    pictures=db.relationship('Picture',secondary=album_has_pictures,order_by='album_has_pictures.columns.rank')
     user=db.relationship('User',foreign_keys=[user_id],backref=db.backref("albums",cascade="all,delete-orphan"))
+    @classmethod
+    def re_order(cls,album_id,ordering):
+        album=Album.query.get(album_id)
+        for picture_id in ordering:
+            #delete
+            album.pictures
     @classmethod
     def new(cls,user_id,name,description=""):
         new_album=Album(user_id=user_id,name=name,description=description)

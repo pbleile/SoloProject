@@ -146,14 +146,17 @@ def get_pics(filepath):
 
 def view_pic(picture_id):
     # render page that displays the picture in large format with details
+    user=User.get_one(session['MyWebsite_user_id'])
     pic=Picture.query.get(picture_id)
     print(pic)
     # Open image file for reading (binary mode)
     f = open('UserFiles/'+pic.file_path, 'rb')
     # Return Exif tags
     tags = exifread.process_file(f)
-    print(tags)
-    return render_template('view.html',picture=pic,exif_data=tags)
+    # print(tags)
+    # find prev and next pics in the album
+    album=Album.query.get(user.active_album)
+    return render_template('view.html',album=album, picture_id=picture_id,picture=pic,exif_data=tags)
 
 def delete_pic(picture_id):
     #delete the picture from the database, and file system
@@ -207,5 +210,31 @@ def reorder_album():
         record.rank=rank
     album_order.commit()
     print(album_order.get_order(python_obj["album_id"]))
-
     return redirect('/dashboard')
+
+def update_photo_info():
+    photo_info=json.loads(request.form['json'])
+    print("Photo Info",photo_info)
+    Picture.update_info(photo_info)
+    return "Thank You"
+
+def update_album_info():
+    album_info=json.loads(request.form['json'])
+    print("Album Info",album_info)
+    Album.update_info(album_info)
+    return "Thank You"
+
+def set_active_album():
+    active_album=json.loads(request.form['json'])
+    print("Active Album", active_album)
+    session['active_album']=active_album['album_id']
+    user=User.get_one(session['MyWebsite_user_id'])
+    user.set_active_album(active_album['album_id'])
+    return "Thank You"
+
+def picture_search():
+    print(request.form['search_str'])
+    # pictures=Picture.query.filter(Picture.name.like("%"+request.form['search_str']+"%")).all()
+    search_result_album=Album.search(session['MyWebsite_user_id'],request.form['search_str'])
+    print("search results:",search_result_album)
+    return render_template("search_results.html",album=search_result_album)

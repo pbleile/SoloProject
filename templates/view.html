@@ -4,14 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js" integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        $(function(){
+            $("#picture_name, #picture_description").click(function(){
+                $(this).html('<input type="text" name="'+$(this).attr("id")+'" value="'+$(this).text()+'">');
+                $(this).children(":first-child").focus();
+            });
+            $("#picture_name, #picture_description").on("focusout","input",function(){
+                var name= $(this).attr("name");
+                // Quick exit if no changes made (since page render)
+                if (name=="picture_description"){
+                    if ("{{picture.description}}"==$(this).val()){
+                        $(this).parent().html($(this).val());
+                        return
+                    }
+                } else {
+                    if ($(this).val()=="{{picture.name}}"){
+                        $(this).parent().html($(this).val());
+                        return
+                    }
+                }
+
+                var update_info={
+                    "picture_id" : {{picture.id}}
+                };
+                update_info[name]=$(this).val();
+                $.ajax({
+                    method:"POST",
+                    url: "/update_photo_info",
+                    data: {json: JSON.stringify(update_info)}
+                }).done(function(resp){});
+                $(this).parent().html($(this).val());
+            });
+
+            document.getElementById("current_photo").addEventListener("wheel", myFunction);
+            function myFunction(event) {
+                //this.style.fontSize = "35px";
+                console.log("mouse wheel");
+                console.log(event.deltaY);
+                $(this).height($(this).height()-event.deltaY);
+                $(this).width($(this).width()-event.deltaY);
+                if (event.deltaY>0){
+                    console.log($(this).height());
+                }
+                if (event.deltaY<0){}
+            }
+        })
+    </script>
     <style>
         .fa{
             font-size:36px;
         }
         img{
             height: 90vmin;
-            width:90vmin;
+        }
+        #info_panel{
+            width: 300px;
+            
+        }
+        .side_nav{
+            width:30px;
+            vertical-align: top;
+            height: 90vmin;
+            background-image: linear-gradient(#000000,#ffffff);
+            display:inline-block;
         }
     </style>
     <title>PhotBomb!</title>
@@ -19,15 +80,69 @@
 <body>
     <div id="wrapper">
         <div id="top_nav">
-            <a href="/dashboard"><i class="fa fa-arrow-circle-left"></i> Back</a>
-            <a href="/UserFiles/{{picture.file_path}}" download><i class="fa fa-cloud-download"></i> Download</a>
-            <a href=""><i class="fa fa-info-circle"></i>Info</a>
-            <a href="#"><i class="fa fa-star"></i> Favorite</a>
-            <a href="/delete/{{picture.id}}"><i class="	fa fa-trash"></i> Delete</a>
+            <a href="/dashboard" title="Dashbaord"><i class="fa fa-arrow-circle-left"></i></a>
+            <a href="/UserFiles/{{picture.file_path}}" download title="Download"><i class="fa fa-cloud-download"></i> </a>
+            <a hidden href=""><i class="fa fa-info-circle"></i>Info</a>
+            <a hidden href="#"><i class="fa fa-star"></i> Favorite</a>
+            <a href="/delete/{{picture.id}}" title="Delete"><i class="	fa fa-trash"></i> </a>
         </div>
         <hr>
-        <div>
-            <img src="/UserFiles/{{picture.file_path}}" alt="">
+        <div class="side_nav">
+            {% if album.pictures.index(picture)>0 %}
+            <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}" title="Previous Photo"><<</a>
+            {% else %}
+            <a href="#" disabled=true title="Start of Album"><<</a>
+            {% endif %}
+        </div>
+        <div id="img_panel" class="d-inline-block align-top">
+            <img id="current_photo" src="/UserFiles/{{picture.file_path}}" alt="">
+        </div>
+        <div class="side_nav">
+            {% if album.pictures.index(picture)< album.pictures|length-1 %}
+                <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}" title="Next Photo">>></a>
+            {% else %}
+                <a href="#" disabled=true title="End of Album">>></a>
+            {% endif %}
+        </div>
+        <div id="info_panel" class="d-inline-block align-top">
+            <h2>Photo Info</h2>
+            <table>
+                <thead></thead>
+                <tbody>
+                    <tr>
+                        <td>Name:</td>
+                        <td id="picture_name">{{picture.name}}</td>
+                    </tr>
+                    <tr>
+                        <td>Description:</td>
+                        <td id="picture_description">{{picture.description}}</td>
+                    </tr>
+                    <tr>
+                        <td>Uploaded:</td>
+                        <td>{{picture.created_at}}</td>
+                    </tr>
+                    <tr>
+                        <td>Taken on:</td>
+                        <td>{{exif_data['EXIF DateTimeOriginal']}}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Modified:</td>
+                        <td>{{exif_data['Image DateTime']}}</td>
+                    </tr>
+                   <tr>
+                        <td>Taken Using:</td>
+                        <td>{{exif_data['Image Make']}} {{exif_data['Image Model']}}</td>
+                    </tr> 
+                    <tr>
+                        <td>In Album(s):</td>
+                        <td>
+                            {% for album in picture.in_albums %}
+                                {{album.name}}<br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </body>

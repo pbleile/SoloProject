@@ -64,6 +64,14 @@ class Picture(db.Model):
         pic=Picture.query.get(picture_id)
         db.session.delete(pic)
         db.session.commit()
+    @classmethod
+    def update_info(cls,picture_info):
+        pic=Picture.query.get(picture_info['picture_id'])
+        if "picture_description" in picture_info.keys():
+            pic.description=picture_info['picture_description']
+        if "picture_name" in picture_info.keys():
+            pic.name=picture_info['picture_name']
+        db.session.commit()
 
 class Album(db.Model):
     __tablename__="albums"
@@ -84,6 +92,8 @@ class Album(db.Model):
     @classmethod
     def new(cls,user_id,name,description=""):
         new_album=Album(user_id=user_id,name=name,description=description)
+        if name=="search_results":
+            return "Error: cannot use this name"
         if len(name)>1:
             db.session.add(new_album)
             db.session.commit()
@@ -107,6 +117,34 @@ class Album(db.Model):
             album=Album.query.get(album_id)
         album.pictures.append(picture)
         db.session.commit()
+    @classmethod
+    def update_info(cls,album_info):
+        album=Album.query.get(album_info['album_id'])
+        if album.name=="search_results":
+            return
+        if "album_description" in album_info.keys():
+            album.description=album_info['album_description']
+        if "album_name" in album_info.keys():
+            album.name=album_info['album_name']
+        db.session.commit()
+    @classmethod
+    def search(cls,user_id,search_str):
+        album=cls.query.filter(cls.user_id==user_id).filter(cls.name=="search_results").first()
+        if not album:
+            album=cls(user_id=user_id,name="search_results",description="Search results for: "+search_str)
+            db.session.add(album)
+            db.session.commit()
+        else:
+            for picture in album.pictures:
+                # remove picture from search_results album, but not from db
+                album.pictures.remove(picture)
+                db.session.commit()
+        found_pictures=Picture.query.filter(Picture.name.like("%"+search_str+"%")).all()
+        for picture in found_pictures:
+            album.pictures.append(picture)
+        db.session.commit()
+        return album
+
 
 class User(db.Model):
     __tablename__="users"

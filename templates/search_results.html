@@ -1,0 +1,14 @@
+<div id="search_results" class="album d-inline-block shadow p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="Click to make this album the target">
+    <p class="font-weight-bold album_name" album_id="{{album.id}}" title="Change the name to make this album permanent (Double click to change)">Search Results</p>
+    <ul class="sortable" album_id="{{album.id}}">
+    {% if album.pictures|length==0 %}
+        <h2>No matches</h2>
+    {% else %}
+        {% for picture in album.pictures %}
+            <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
+        {% endfor %}
+    {% endif %}
+    </ul>
+    <p class="album_description" album_id="{{album.id}}" title="Double click to change">{{album.description}}</p>
+</div>
+

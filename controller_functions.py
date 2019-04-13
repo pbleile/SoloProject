@@ -2,6 +2,8 @@ from flask import session,redirect,render_template,request,flash,send_from_direc
 from config import EMAIL_REGEX,bcrypt
 from models import User,Album,Picture,album_has_pictures,Album_to_Pic
 import os,sys
+import os.path
+from os import path
 from werkzeug.utils import secure_filename
 import exifread
 import json
@@ -123,12 +125,15 @@ def upload():
         ALLOWED_EXTENSIONS = ('bmp','png', 'jpg', 'jpeg', 'gif')
         if '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
             print(filename)
-            # Save pic to the filesystem
-            eachfile.save('UserFiles/'+user.email+'/'+filename)
-            # Add pic to the pictures db
-            pic=Picture.new(user.id,user.email+'/'+filename,filename)
-            # Add pic to the active album
-            Album.add_pic(user,pic,album_id)
+            if path.exists('UserFiles/'+user.email+'/'+filename):
+                Album.add_pic(user,pic,album_id)
+            else:
+                # Save pic to the filesystem
+                eachfile.save('UserFiles/'+user.email+'/'+filename)
+                # Add pic to the pictures db
+                pic=Picture.new(user.id,user.email+'/'+filename,filename)
+                # Add pic to the active album
+                Album.add_pic(user,pic,album_id)
             user.set_active_album(album_id)
         else:
             print('invalid file extension.')

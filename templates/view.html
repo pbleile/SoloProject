@@ -81,15 +81,27 @@
     <div id="wrapper">
         <div id="top_nav">
             <a href="/dashboard" title="Dashbaord"><i class="fa fa-arrow-circle-left"></i></a>
-            <a href="/UserFiles/{{picture.file_path}}" download title="Download"><i class="fa fa-cloud-download"></i> </a>
+            <a href="/UserFiles/{{picture.file_path}}" download title="Download"><i class="fa fa-cloud-download"></i></a>
             <a hidden href=""><i class="fa fa-info-circle"></i>Info</a>
-            <a hidden href="#"><i class="fa fa-star"></i> Favorite</a>
-            <a href="/delete/{{picture.id}}" title="Delete"><i class="	fa fa-trash"></i> </a>
+            <a hidden href="#"><i class="fa fa-star"></i>Favorite</a>
+            <a href="/delete/{{picture.id}}" title="Delete"><i class="	fa fa-trash"></i></a>
+            
+            {% if album.pictures.index(picture)>0 %}
+            <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}" title="Previous Photo"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+            {% else %}
+            <a href="#" disabled=true title="Start of Album"><<</i></a>
+            {% endif %}
+
+            {% if album.pictures.index(picture)< album.pictures|length-1 %}
+                <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}" title="Next Photo"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+            {% else %}
+                <a href="#" disabled=true title="End of Album">>></a>
+            {% endif %}
         </div>
         <hr>
         <div class="side_nav">
             {% if album.pictures.index(picture)>0 %}
-            <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}" title="Previous Photo"><<</a>
+            <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}" title="Previous Photo"></i><<</a>
             {% else %}
             <a href="#" disabled=true title="Start of Album"><<</a>
             {% endif %}
@@ -99,7 +111,7 @@
         </div>
         <div class="side_nav">
             {% if album.pictures.index(picture)< album.pictures|length-1 %}
-                <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}" title="Next Photo">>></a>
+                <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}" title="Next Photo"></i>>></a>
             {% else %}
                 <a href="#" disabled=true title="End of Album">>></a>
             {% endif %}

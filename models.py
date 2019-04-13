@@ -139,7 +139,7 @@ class Album(db.Model):
                 # remove picture from search_results album, but not from db
                 album.pictures.remove(picture)
                 db.session.commit()
-        found_pictures=Picture.query.filter(Picture.name.like("%"+search_str+"%")).all()
+        found_pictures=Picture.query.filter(or_(Picture.name.like("%"+search_str+"%"),Picture.description.like("%"+search_str+"%"))).all()
         for picture in found_pictures:
             album.pictures.append(picture)
         db.session.commit()

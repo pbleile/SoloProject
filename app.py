@@ -6,14 +6,13 @@ if __name__=="__main__":
     app.run(debug=True)
 
 # To Do
-# 1. Album renaming
-# 2. Picture ordering in album
-# 3. Set default album (and move to top)
-# 4. Set View Picture to window size
-# 5.    Display Picture info
-# 6.    Picture renaming
-# 7. Search-> match one picture, and switch to View
-# 8. Move through pictures in View
-# 9. Handle duplicate file names
-# 10.Enable security
-# 11.Replace literals with constants
+# Required
+# 1. Test Handling duplicate file names
+# 2. Enable security
+# 3. Fatten Models and Slim contollers
+# 4. Modularize
+# 5. Replace literals with constants
+# Optional (features)
+# 1. Album ordering on page
+# 2. Drag zoomed in pic around inside div
+# 3. Copy Move pictures between albums without re-upload

@@ -10,8 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome!  Sign in.</h1>
-        <div class="d-inline-block mb-3 border border-primary p-3" id="register">
+        <h1>Welcome to PhotoBomb!  Plese sign in.</h1>
+        <div class="d-inline-block mb-3 p-3 border border-secondary rounded shadow" id="register">
             <form action="/register" method="POST">
                 <legend>Registration</legend>
                 <fieldset>
@@ -44,7 +44,7 @@
                 <input class="button" type="submit" value="Register">
             </form>
         </div>
-        <div class="d-inline-block mb-3 border border-primary p-3" id="login">
+        <div class="d-inline-block mb-3 p-3 border border-secondary rounded shadow" id="login">
             <form action="/login" method="POST">
                 <legend>Login</legend>
                     {% with messages = get_flashed_messages(category_filter=["login"]) %}     <!-- declare a variable called messages -->

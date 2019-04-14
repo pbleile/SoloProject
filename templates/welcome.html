@@ -4,14 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>PhotoBom!</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>PhotoBomb!</title>
+    <!-- This file is small enough that I think it makes sense to leave the style inline here. -->
+    <style>
+        body{
+            background-image: url("/static/art-artistic-black-and-white-310435.jpg");
+            background-repeat: no-repeat;
+            background-size: 100vw 100vh;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div id="wrapper">
-        <h1>PhtoBomb!</h1>
-        <p>Free storage and organization for all your memories</p>
-        <a href="/dashboard">Go To PhotoBomb!</a>
-        <div id="samples"></div>
+        <h1 >PhotoBomb!</h1>
+        <h2>Free storage and organization for all your memories</h2>
+        <a class="btn btn-lg shadow-lg m-3 btn-outline-dark" href="/signin">Go To PhotoBomb!</a>
+        <div id="samples">
+            <!-- <img src="/static/art-artistic-black-and-white-310435.jpg" alt="photos on a wall"> -->
+        </div>
     </div>
 </body>
 </html>

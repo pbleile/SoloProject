@@ -15,11 +15,11 @@ album_has_pictures=db.Table('album_has_pictures',
     db.Column('updated_at',db.DateTime, server_default=func.now(), onupdate=func.now()),
     db.Column('rank',db.Integer, default=rankDefault)
     )
-# directly query album_has_pictures like this (returns a list of tuples [(1,),(2,)...(10,)]):
+# To directly query album_has_pictures like this (returns a list of tuples [(1,),(2,)...(10,)]):
 # q=db.session.query(album_has_pictures.columns.rank).filter(album_has_pictures.columns.album_id==2).all()
 
-
 class Album_to_Pic:
+# This class is a workaround to access the extra data in the album_has_pictures many to many Table.
     Base = automap_base()
     engine=db.session.get_bind()
     Base.prepare(engine, reflect=True)
@@ -29,18 +29,28 @@ class Album_to_Pic:
     def get_all(self):
         return db.session.query(self.table).all()
     def get_by_album(self,album_id):
-        # return db.session.query(self.table).filter(self.table.album_id==album_id).all()
-        return db.session.query(Picture).join(self.table,self.table.picture_id==Picture.id).filter(self.table.album_id==2).order_by(self.table.rank).all()
+        # Return a list of pictures (Picture) belonging to an album, ordered by rank (int).
+        return db.session.query(Picture).join(self.table,self.table.picture_id==Picture.id).filter(self.table.album_id==album_id).order_by(self.table.rank).all()
     def get_one(self,album_id,picture_id):
+        # Return one record using the composite primary key (user_id + album_id).
         return db.session.query(self.table).filter(self.table.album_id==album_id).filter(self.table.picture_id==picture_id).first()
     def commit(self):
         db.session.commit()
     def get_order(self, album_id):
+        # Returns the picture order of an album as a list of picture_id (int).
         table=db.session.query(self.table).filter(self.table.album_id==album_id).order_by(self.table.rank).all()
         picture_id_order=[]
         for record in table:
             picture_id_order.append(record.picture_id)
         return picture_id_order
+    def set_order(self, ordering_dict):
+        # Ordering_list is a dict containing a list of picture_id in the desired order.
+        # eg. {'album_id': '2', 'ordering': ['6', '2', '1', '3', '5', '4', '7', '8', '9', '10']}
+        for index,picture_id in enumerate(ordering_dict["ordering"],1):
+            # print(index, picture_id)
+            record=album_order.get_one(ordering_dict["album_id"],picture_id)
+            record.rank=index
+            db.session.commit()
 
 class Picture(db.Model):
     __tablename__="pictures"
@@ -84,13 +94,8 @@ class Album(db.Model):
     pictures=db.relationship('Picture',secondary=album_has_pictures,order_by='album_has_pictures.columns.rank')
     user=db.relationship('User',foreign_keys=[user_id],backref=db.backref("albums",cascade="all,delete-orphan"))
     @classmethod
-    def re_order(cls,album_id,ordering):
-        album=Album.query.get(album_id)
-        for picture_id in ordering:
-            #delete
-            album.pictures
-    @classmethod
     def new(cls,user_id,name,description=""):
+        # Create a new album (Album) record.
         new_album=Album(user_id=user_id,name=name,description=description)
         if name=="search_results":
             return "Error: cannot use this name"
@@ -102,15 +107,18 @@ class Album(db.Model):
             return new_album
     @classmethod
     def get_for_user(cls,user_id):
+        # Return a list of albums (as Album objs) for Int user_id.
         user=User.query.get(user_id)
         albums=Album.query.filter(user)
         return albums
     @classmethod
     def get_active(cls,user):
+        # Return the active album for user (User).
         active_album=cls.query.filter(cls.user_id==user.id,cls.id==user.active_album).first()
         return active_album
     @classmethod
     def add_pic(cls,user,picture,album_id):
+        # Add a picture (Picture) to the active album (by user (User)) or to the album of album_id (int).
         if not album_id:
             album=Album.get_active(user)
         else:
@@ -119,6 +127,8 @@ class Album(db.Model):
         db.session.commit()
     @classmethod
     def update_info(cls,album_info):
+        # Update the name /and or description of an album.
+        # Album_info in the form of {'album_id':'1','album_name':'asdf',album_description':'asf'}.
         album=Album.query.get(album_info['album_id'])
         if album.name=="search_results":
             return
@@ -129,6 +139,8 @@ class Album(db.Model):
         db.session.commit()
     @classmethod
     def search(cls,user_id,search_str):
+        # Use a speacial album named "search_results" to store pictures with name or query matching search_str.
+        # If no album named search_results exists, it is created.  If it does exist, it's contents are replaced.
         album=cls.query.filter(cls.user_id==user_id).filter(cls.name=="search_results").first()
         if not album:
             album=cls(user_id=user_id,name="search_results",description="Search results for: "+search_str)
@@ -136,7 +148,7 @@ class Album(db.Model):
             db.session.commit()
         else:
             for picture in album.pictures:
-                # remove picture from search_results album, but not from db
+                # Remove picture from search_results album, but not from db.
                 album.pictures.remove(picture)
                 db.session.commit()
         found_pictures=Picture.query.filter(or_(Picture.name.like("%"+search_str+"%"),Picture.description.like("%"+search_str+"%"))).all()
@@ -159,14 +171,17 @@ class User(db.Model):
     active_album = db.Column(db.Integer)
     profile_picture=db.Column(db.Integer,default=0)
     def set_active_album(self,album_id):
+        # Store the user's active album_id (int).
         self.active_album=album_id
         db.session.commit()
         return self
     def update_email(self,new_email):
+        # Update email.
         self.email=new_email
         db.session.commit()
         return self
     def update_profile_pic(self,pic_id):
+        # Store a picture_id (int) to use as profile picture.
         self.profile_picture=pic_id
         db.session.commit()
         return self

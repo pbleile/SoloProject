@@ -1,0 +1,19 @@
+.nav-thumbnail{
+    height: 50px;
+}
+.img-thumbnail{
+    height: 100px;
+}
+.dropdown-menu{
+    width: 300px;
+}
+.album{
+    min-height: 172px;
+    vertical-align: top;
+}
+.active_album{
+    background-image: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(108, 110, 145));
+}
+.ui-sortable-placeholder{
+    vertical-align: top;
+}

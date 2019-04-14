@@ -1,7 +1,8 @@
 from config import app
 from controller_functions import *
 
-app.add_url_rule('/',view_func=show_register_and_login)
+app.add_url_rule('/signin',view_func=show_register_and_login)
+app.add_url_rule('/',view_func=show_welcome_page)
 app.add_url_rule('/register',view_func=register_user,methods=["POST"])
 app.add_url_rule('/login',view_func=login_user,methods=['POST'])
 app.add_url_rule('/logout',view_func=logout_user)

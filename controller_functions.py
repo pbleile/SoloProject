@@ -8,6 +8,9 @@ from werkzeug.utils import secure_filename
 import exifread
 import json
 
+def show_welcome_page():
+    return render_template("welcome.html")
+
 def logout_user():
     session.clear()
     return redirect('/')
@@ -65,15 +68,16 @@ def show_user_dashboard():
     # render the main dashboard page
     if not 'MyWebsite_user_id' in session.keys():
         return redirect('/')
-    if User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
-        print("user login_success")
-        user=User.get_one(session['MyWebsite_user_id'])
-        if user.profile_picture==0:
-            profile_pic="/static/funny_smile_emoticons_vector_icon_522939.jpg"
-        else:
-            profile_pic='/UserFiles/'+ Picture.query.get(user.profile_picture).file_path
-        print(profile_pic)
-        return render_template('dashboard.html',albums=user.albums,profile_pic=profile_pic)
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
+    print("user login_success")
+    user=User.get_one(session['MyWebsite_user_id'])
+    if user.profile_picture==0:
+        profile_pic="/static/funny_smile_emoticons_vector_icon_522939.jpg"
+    else:
+        profile_pic='/UserFiles/'+ Picture.query.get(user.profile_picture).file_path
+    print(profile_pic)
+    return render_template('dashboard.html',albums=user.albums,profile_pic=profile_pic)
 
 def show_admin_page():
     if not 'MyWebsite_user_id' in session.keys():
@@ -114,8 +118,14 @@ def make_user(user_id):
 def show_danger():
     return render_template('danger.html',hacker_ip=request.remote_addr)
 
+# **************** Photobomb specific ************************* #
+
 def upload():
     # upload one or more pictures to the filesystem and register it/them in the database
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     user=User.get_one(session['MyWebsite_user_id'])
     album_id=request.form['active_album']
     # f=request.files['new_pic']
@@ -146,14 +156,22 @@ def upload():
 
 def get_pics(filepath):
     # responds to url requests by sending the file to the requestor
-    print(filepath)
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
+    # print(filepath)
     return send_from_directory('UserFiles', filepath)
 
 def view_pic(picture_id):
     # render page that displays the picture in large format with details
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     user=User.get_one(session['MyWebsite_user_id'])
     pic=Picture.query.get(picture_id)
-    print(pic)
+    # print(pic)
     # Open image file for reading (binary mode)
     f = open('UserFiles/'+pic.file_path, 'rb')
     # Return Exif tags
@@ -165,6 +183,10 @@ def view_pic(picture_id):
 
 def delete_pic(picture_id):
     #delete the picture from the database, and file system
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     pic=Picture.query.get(picture_id)
     print("deleting: ",pic)
     if os.path.exists('UserFiles/'+pic.file_path):
@@ -176,7 +198,11 @@ def delete_pic(picture_id):
     return redirect ('/dashboard')
 
 def create_album():
-    print(request.form)
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
+    # print(request.form)
     new_album=Album.new(session['MyWebsite_user_id'],request.form['name'],request.form['description'])
     if new_album==None:
         # handle error
@@ -184,6 +210,10 @@ def create_album():
     return redirect ('/dashboard')
 
 def update_profile():
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     # need email validations
     user=User.get_one(session['MyWebsite_user_id'])
     if user.email!=request.form['email_address']:
@@ -201,45 +231,64 @@ def update_profile():
     return redirect ('/dashboard')
 
 def reorder_album():
-    print("form:", request.form['json'])
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
+    # print("form:", request.form['json'])
     # print(request.form['album_id'])
     python_obj = json.loads(request.form['json'])
-    print("jSON:", json.loads(request.form['json']))
-    print(python_obj["album_id"])
-    print(python_obj["ordering"])
+    # print("jSON:", json.loads(request.form['json']))
+    # print(python_obj["album_id"])
+    # print(python_obj["ordering"])
     # print("jSON:", request.get_json(force=True))
     album_order=Album_to_Pic()
     for rank,picture_id in enumerate(python_obj["ordering"],1):
-        print(rank, picture_id)
+        # print(rank, picture_id)
         record=album_order.get_one(python_obj["album_id"],picture_id)
         record.rank=rank
     album_order.commit()
-    print(album_order.get_order(python_obj["album_id"]))
+    # print(album_order.get_order(python_obj["album_id"]))
     return redirect('/dashboard')
 
 def update_photo_info():
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     photo_info=json.loads(request.form['json'])
-    print("Photo Info",photo_info)
+    # print("Photo Info",photo_info)
     Picture.update_info(photo_info)
     return "Thank You"
 
 def update_album_info():
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     album_info=json.loads(request.form['json'])
-    print("Album Info",album_info)
+    # print("Album Info",album_info)
     Album.update_info(album_info)
     return "Thank You"
 
 def set_active_album():
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
     active_album=json.loads(request.form['json'])
-    print("Active Album", active_album)
+    # print("Active Album", active_album)
     session['active_album']=active_album['album_id']
     user=User.get_one(session['MyWebsite_user_id'])
     user.set_active_album(active_album['album_id'])
     return "Thank You"
 
 def picture_search():
-    print(request.form['search_str'])
-    # pictures=Picture.query.filter(Picture.name.like("%"+request.form['search_str']+"%")).all()
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')    
+    # print(request.form['search_str'])
     search_result_album=Album.search(session['MyWebsite_user_id'],request.form['search_str'])
-    print("search results:",search_result_album)
+    # print("search results:",search_result_album)
     return render_template("search_results.html",album=search_result_album)

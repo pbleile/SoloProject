@@ -1,0 +1,17 @@
+.fa{
+    font-size:36px;
+}
+img{
+    height: 90vmin;
+}
+#info_panel{
+    width: 300px;
+    
+}
+.side_nav{
+    width:30px;
+    vertical-align: top;
+    height: 90vmin;
+    background-image: linear-gradient(#000000,#ffffff);
+    display:inline-block;
+}

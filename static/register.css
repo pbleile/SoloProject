@@ -1,3 +1,7 @@
+body{
+    background-image: linear-gradient(white,rgb(204, 209, 224));
+    height: 100vh;
+}
 input{
     width:200px;
 }

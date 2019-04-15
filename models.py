@@ -108,7 +108,7 @@ class Album(db.Model):
         if len(name)>1:
             db.session.add(new_album)
             db.session.commit()
-            return None
+            return new_album
         else:
             return new_album
     @classmethod

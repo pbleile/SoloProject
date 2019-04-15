@@ -7,6 +7,7 @@ from os import path
 from werkzeug.utils import secure_filename
 import exifread
 import json
+from PIL import Image
 
 def show_welcome_page():
     return render_template("welcome.html")
@@ -31,7 +32,9 @@ def register_user():
             session['user_name']=request.form['first_name']+" "+request.form['last_name']
             session['login_session']=User.get_session_key(user_id)
             session['email_address']=request.form['email_address']
+            # Note: Need to sanitize the email address!
             os.mkdir('UserFiles/'+request.form['email_address'])
+            os.mkdir('UserFiles/thumbnails/'+request.form['email_address'])
             Album.new(user_id,'Default')
             return redirect('/success')
     return redirect('/')
@@ -144,6 +147,10 @@ def upload():
                 pic=Picture.new(user.id,user.email+'/'+filename,filename)
                 # Add pic to the active album
                 Album.add_pic(user,pic,album_id)
+                # Create thumbnail image using PIL
+                im=Image.open('UserFiles/'+user.email+'/'+filename)
+                im.thumbnail((100,100),Image.ANTIALIAS)
+                im.save('UserFiles/thumbnails/'+user.email+'/'+filename)
             user.set_active_album(album_id)
         else:
             print('invalid file extension.')
@@ -191,6 +198,8 @@ def delete_pic(picture_id):
     print("deleting: ",pic)
     if os.path.exists('UserFiles/'+pic.file_path):
         os.remove('UserFiles/'+pic.file_path)
+        if os.path.exists('UserFiles/thumbnails'+pic.file_path):
+            os.remove('UserFiles/thumbnails/'+pic.file_path)
         Picture.delete(picture_id)
         print("delete success: ", pic)
     else:
@@ -243,8 +252,21 @@ def reorder_album():
     # print(python_obj["ordering"])
     # print("jSON:", request.get_json(force=True))
     album_order=Album_to_Pic()
+    # This section to be replaced by album_order.set_order(python_obj)
+    old_order=album_order.get_order(python_obj["album_id"])
+    album=Album.query.get(python_obj["album_id"])
+    for picture_id in old_order:
+        if picture_id not in python_obj["ordering"]:
+            picture=Picture.query.get(picture_id)
+            album.pictures.remove(picture)
+            album_order.commit()
     for rank,picture_id in enumerate(python_obj["ordering"],1):
         # print(rank, picture_id)
+
+        picture=Picture.query.get(picture_id)
+        if picture not in album.pictures:
+            Album.add_pic(user=None,picture=picture,album_id=album.id)
+
         record=album_order.get_one(python_obj["album_id"],picture_id)
         record.rank=rank
     album_order.commit()

@@ -6,7 +6,7 @@
         <h2>No matches</h2>
     {% else %}
         {% for picture in album.pictures %}
-            <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
+            <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
         {% endfor %}
     {% endif %}
     </ul>

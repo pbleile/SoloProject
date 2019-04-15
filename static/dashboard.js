@@ -34,7 +34,8 @@ $(function(){
 
     // Move pictures around with by dragging
     // be careful with this if using ajax to add new albums
-    $( ".sortable" ).sortable();
+    $( ".sortable" ).sortable({connectWith:".sortable"}).disableSelection();  // can move between albums
+    // $( ".sortable" ).sortable().disableSelection(); // cannot move between albums
     $( "#albums" ).on( "sortupdate",".sortable", function( event, ui ) {
         console.log("New ordering");
         //var sorted = $(this).sortable( "serialize", {key: "pic", attribute: "pictrue_id" } );

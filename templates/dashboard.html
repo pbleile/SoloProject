@@ -107,7 +107,7 @@
                         <p class="font-weight-bold album_name" album_id="{{album.id}}" title="Double click to change">{{album.name}}</p>
                         <ul class="sortable" album_id="{{album.id}}">
                             {% for picture in album.pictures %}
-                            <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
+                            <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                             {% endfor %}
                         </ul>
                         <p class="album_description" album_id="{{album.id}}" title="Double click to change">{{album.description}}</p>

@@ -19,7 +19,9 @@ album_has_pictures=db.Table('album_has_pictures',
 # q=db.session.query(album_has_pictures.columns.rank).filter(album_has_pictures.columns.album_id==2).all()
 
 class Album_to_Pic:
-# This class is a workaround to access the extra data in the album_has_pictures many to many Table.
+    # This class is a workaround to access the extra data in the album_has_pictures many to many Table.
+    # This was not the best solution to this.  See the section on Association Object:
+    # https://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#relationships-many-to-many
     Base = automap_base()
     engine=db.session.get_bind()
     Base.prepare(engine, reflect=True)
@@ -65,6 +67,10 @@ class Picture(db.Model):
     user=db.relationship('User', foreign_keys=[user_id],  backref=db.backref("pictures",cascade="all,delete-orphan"))
     @classmethod
     def new(cls,user_id,file_path,name):
+        """
+        Add a new file to the Picture table.
+        new(user_id,file_path,name)
+        """
         new_pic=Picture(user_id=user_id,name=name,description="",file_path=file_path)
         db.session.add(new_pic)
         db.session.commit()

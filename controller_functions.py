@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 import exifread
 import json
 from PIL import Image
+from datetime import datetime
 
 def show_welcome_page():
     return render_template("welcome.html")
@@ -35,9 +36,11 @@ def register_user():
             # Note: Need to sanitize the email address!
             os.mkdir('UserFiles/'+request.form['email_address'])
             os.mkdir('UserFiles/thumbnails/'+request.form['email_address'])
-            Album.new(user_id,'Default')
-            return redirect('/success')
-    return redirect('/')
+            album=Album.new(user_id,'Default')
+            user=User.get_one(user_id)
+            user.set_active_album(album.id)
+            return redirect('/user')
+    return redirect('/signin')
 
 def login_user():
     user_info=User.validate_login(request.form)
@@ -139,18 +142,21 @@ def upload():
         if '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
             print(filename)
             if path.exists('UserFiles/'+user.email+'/'+filename):
-                Album.add_pic(user,pic,album_id)
-            else:
-                # Save pic to the filesystem
-                eachfile.save('UserFiles/'+user.email+'/'+filename)
-                # Add pic to the pictures db
-                pic=Picture.new(user.id,user.email+'/'+filename,filename)
-                # Add pic to the active album
-                Album.add_pic(user,pic,album_id)
-                # Create thumbnail image using PIL
-                im=Image.open('UserFiles/'+user.email+'/'+filename)
-                im.thumbnail((100,100),Image.ANTIALIAS)
-                im.save('UserFiles/thumbnails/'+user.email+'/'+filename)
+                # Album.add_pic(user,pic,album_id)
+                filename=filename.rsplit('.',1)
+                filename[0]=filename[0]+str(round(datetime.timestamp(datetime.now())))
+                filename='.'.join(filename)
+
+            # Save pic to the filesystem
+            eachfile.save('UserFiles/'+user.email+'/'+filename)
+            # Add pic to the pictures db
+            pic=Picture.new(user.id,user.email+'/'+filename,filename)
+            # Add pic to the active album
+            Album.add_pic(user,pic,album_id)
+            # Create thumbnail image using PIL
+            im=Image.open('UserFiles/'+user.email+'/'+filename)
+            im.thumbnail((100,100),Image.ANTIALIAS)
+            im.save('UserFiles/thumbnails/'+user.email+'/'+filename)
             user.set_active_album(album_id)
         else:
             print('invalid file extension.')

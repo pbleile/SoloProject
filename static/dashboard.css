@@ -11,9 +11,19 @@
     min-height: 172px;
     vertical-align: top;
 }
+.album p{
+    min-width: 100px;
+    min-height: 24px;
+    outline: 1px solid;
+}
 .active_album{
     background-image: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(108, 110, 145));
 }
 .ui-sortable-placeholder{
     vertical-align: top;
+}
+
+.sortable{
+    min-height: 100px;
+    min-width: 100px;
 }

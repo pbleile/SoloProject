@@ -15,4 +15,5 @@ if __name__=="__main__":
 # Optional (features)
 # 1. Album ordering on page
 # 2. Drag zoomed in pic around inside div
-# 3. Copy Move pictures between albums without re-upload
+# 3. Choose Copy or Move pictures between albums without re-upload
+# 4. Play album (also set playback speed, turn photo name/descripton on/off).

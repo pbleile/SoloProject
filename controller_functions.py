@@ -54,7 +54,7 @@ def login_user():
         else:
             return redirect('/user')
     flash("Login failed: email or password is incorrect",'login')
-    return redirect('/')
+    return redirect('/signin')
 
 def show_login_success():
     if not 'MyWebsite_user_id' in session.keys():

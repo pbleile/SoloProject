@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="PhotoBomb! Dashboard">
+    <meta name="author" content="Pierre Bleile">
     
     <!-- bootstrap css cdn -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -25,15 +27,19 @@
     <title>PhotoBomb! Dashboard</title>
 </head>
 <body>
-    <div id="wrapper" class="mx-3">
+    <div id="wrapper" class="m-3">
         <div id="header" >
             <img class="nav-thumbnail" src="../static/camera-icon-th.png" alt="PhotoBomb! logo">
             <h1 class="d-inline-block">PhotoBomb!</h1>
-            <form id="picture_search" action="/search" method="POST" class="input-group-btn d-inline-block">
-                <input class="ml-5 b4-s shadow" type="text" name="search_str">
-                <button class="btn btn-default shadow" type="submit">Search</button>
+            <!-- Search -->
+            <form id="picture_search" action="/search" method="POST" class="input-group-btn d-inline-block" title="Seach for title or description">
+                <div class="input-group">
+                    <input class="ml-5 b4-s rounded-left border-right-0" type="text" name="search_str">
+                    <button class="btn btn-primary rounded-right" type="submit">Search</button>
+                </div>
             </form>
             <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light"> -->
+            <!-- Create New Album Drop Down -->
             <div class="dropdown d-inline">
                 <button class="btn shadow dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Create New Album
@@ -41,8 +47,8 @@
                 <div class="dropdown-menu" >
                     <form class="px-4 py-3" action="/create_album" method="POST">
                         <div class="form-group">
-                            <label for="new_album">Create Album</label>
-                            <input type="text" name="name" class="form-control" id="album_name" placeholder="Album Name" >
+                            <label for="new_album">New Album Name</label>
+                            <input type="text" name="name" class="form-control" id="album_name" placeholder="What you want to call it..." >
                         </div>
                         <div class="form-group">
                             <label for="album_description">Description</label>
@@ -102,15 +108,18 @@
                     {% set active_album="" %}
                     {% if album.user.active_album==album.id: %}
                         {% set active_album="active_album" %}
+                        {% set album_title="Active album: Uploads will appear here." %}
+                    {% else %}
+                        {% set album_title="Click to make this album the target" %}
                     {% endif %}
-                    <div class="album d-inline-block shadow p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="Click to make this album the target">
-                        <p class="font-weight-bold album_name" album_id="{{album.id}}" title="Double click to change">{{album.name}}</p>
+                    <div class="album d-inline-block shadow-lg p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="{{album_title}}">
+                        <p class="font-weight-bold album_name pl-2 border" album_id="{{album.id}}" title="Album Name:  Double click to change">{{album.name}}</p>
                         <ul class="sortable" album_id="{{album.id}}">
                             {% for picture in album.pictures %}
                             <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                             {% endfor %}
                         </ul>
-                        <p class="album_description" album_id="{{album.id}}" title="Double click to change">{{album.description}}</p>
+                        <p class="album_description pl-2 border" album_id="{{album.id}}" title="Album Description:  Double click to change">{{album.description}}</p>
                     </div>
                 {% endif %}
             {% endfor %}

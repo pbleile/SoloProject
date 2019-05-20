@@ -1,8 +1,8 @@
-.vscode
-__pycache__
+.vscode/
+__pycache__/
 *.zip
 *.bak
 *.mwb
 *.db
-migrations
-UserFiles
+migrations/
+UserFiles/

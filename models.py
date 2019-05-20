@@ -20,7 +20,7 @@ album_has_pictures=db.Table('album_has_pictures',
 
 class Album_to_Pic:
     # This class is a workaround to access the extra data in the album_has_pictures many to many Table.
-    # This was not the best solution to this.  See the section on Association Object:
+    # This was not the best solution.  For a better one, see the section on Association Object:
     # https://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html#relationships-many-to-many
     Base = automap_base()
     engine=db.session.get_bind()

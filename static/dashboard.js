@@ -3,9 +3,11 @@ $(function(){
     $('#albums').on('click','.album',function(){
         console.log("album click")
         // remove active_album class from wherever it is
+        $('.active_album').attr('title','Click to make this album the target.')
         $('.active_album').removeClass('active_album');
         // add active_album class to this
         $(this).addClass('active_album');
+        $(this).attr('title','Active album: Uploads will appear here.');
         // set the file upload target album to the active album's id, update the upload labeling
         $("#active_album_input").val($(this).attr("album_id"));
         let file_count=$('.custom-file-input')[0].files.length;

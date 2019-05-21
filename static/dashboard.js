@@ -25,30 +25,49 @@ $(function(){
             url:"/set_active_album",
             data: { json: JSON.stringify({album_id: $(this).attr("album_id")})}
         });
-    })
+    });
 
     // Update upload files label if the file selector is used.
     $('.custom-file-input').change(function(){
         console.log($(this)[0].files.length);
         //$("label[for='inputGroupFile03']").text($(this)[0].files.length+' files selected');
         $("#file_upload_label").text($(this)[0].files.length+" to upload to "+$(".active_album").children('.album_name').text());
-    })
+    });
+
+    // Move albums around by dragging
+    $("#albums").sortable({
+        update: function( event, ui ) {
+            console.log("New album ordering");
+            var sortedIDs = $(this ).sortable( "toArray",{attribute: "album_id"} );
+            console.log(sortedIDs);
+            sortedIDs.reverse();
+            console.log(sortedIDs);
+            var album_order={
+                ordering: sortedIDs
+            }
+            $.ajax({
+                method:"POST",
+                url:"/reorder_albums",
+                data: { json: JSON.stringify(album_order)}
+            });
+        }
+      });
 
     // Move pictures around with by dragging
     // be careful with this if using ajax to add new albums
     $( ".sortable" ).sortable({connectWith:".sortable"})  // can move between albums
     // $( ".sortable" ).sortable().disableSelection(); // cannot move between albums
     $( "#albums" ).on( "sortupdate",".sortable", function( event, ui ) {
-        console.log("New ordering");
+        console.log("New picture ordering");
         //var sorted = $(this).sortable( "serialize", {key: "pic", attribute: "pictrue_id" } );
-        //console.log(sorted);
+        // console.log("picture sorted");
         var sortedIDs = $(this ).sortable( "toArray",{attribute: "picture_id"} );
         console.log($(this).attr("album_id"));
         console.log(sortedIDs);
         var album_order={
             album_id: $(this).attr("album_id"),
             ordering: sortedIDs
-        };
+        }
         console.log(album_order);
         console.log(JSON.stringify(album_order));
         $.ajax({
@@ -56,7 +75,7 @@ $(function(){
             url:"/reorder_album",
             data: { json: JSON.stringify(album_order)}
         });
-    } );
+    });
 
     // Change album names and descriptions
     $("#albums").on( "dblclick",".album_name", function(){
@@ -70,13 +89,14 @@ $(function(){
         var name= $(this).attr("name");
         var update_info={
             "album_id" : $(this).attr("album_id")
-        };
+        }
         update_info[name]=$(this).val();
         $.ajax({
             method:"POST",
             url: "/update_album_info",
             data: {json: JSON.stringify(update_info)}
-        }).done(function(resp){});
+        })
+        .done(function(resp){});
         $(this).parent().html($(this).val());
     });
 

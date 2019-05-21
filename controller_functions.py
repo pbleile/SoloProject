@@ -279,6 +279,18 @@ def reorder_album():
     # print(album_order.get_order(python_obj["album_id"]))
     return redirect('/dashboard')
 
+def reorder_albums():
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')
+    album_order=json.loads(request.form['json'])
+    # print('Album order',album_order['ordering'])
+    for rank,album_id in enumerate(album_order['ordering'],1):
+        # print(album_id,rank)
+        Album.set_rank(album_id,rank)
+    return redirect('/dashboard')
+
 def update_photo_info():
     if not 'MyWebsite_user_id' in session.keys():
         return redirect('/')

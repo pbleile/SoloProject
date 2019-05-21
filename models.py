@@ -97,8 +97,14 @@ class Album(db.Model):
     description=db.Column(db.Text)
     created_at = db.Column(db.DateTime, server_default=func.now())
     updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    rank = db.Column(db.Integer, default=0)
     pictures=db.relationship('Picture',secondary=album_has_pictures,order_by='album_has_pictures.columns.rank')
-    user=db.relationship('User',foreign_keys=[user_id],backref=db.backref("albums",cascade="all,delete-orphan"))
+    user=db.relationship('User',foreign_keys=[user_id],backref=db.backref("albums",cascade="all,delete-orphan",order_by='albums.columns.rank.desc()'))
+    @classmethod
+    def set_rank(cls,album_id,rank):
+        album=cls.query.get(int(album_id))
+        album.rank=int(rank)
+        db.session.commit()
     @classmethod
     def new(cls,user_id,name,description=""):
         # Create a new album (Album) record.

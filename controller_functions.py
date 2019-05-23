@@ -21,7 +21,6 @@ def show_register_and_login():
     print("in show_form")
     return render_template('register.html')
 
-#app.add_url_rule('/register',view_func=register_user,methods=["POST"])
 def register_user():
     errors=User.validate_new(request.form)
     for error in errors:
@@ -33,7 +32,7 @@ def register_user():
             session['user_name']=request.form['first_name']+" "+request.form['last_name']
             session['login_session']=User.get_session_key(user_id)
             session['email_address']=request.form['email_address']
-            # Note: Need to sanitize the email address!
+            # Note: email sanitization checked in User.validate_new(request.form)
             os.mkdir('UserFiles/'+request.form['email_address'])
             os.mkdir('UserFiles/thumbnails/'+request.form['email_address'])
             album=Album.new(user_id,'Default')
@@ -162,18 +161,17 @@ def upload():
             print('invalid file extension.')
     return redirect('/dashboard')
 
-# def download(picture_id):
-#     user=User.get_one(session['MyWebsite_user_id'])
-#     pic=Picture.query.get(picture_id)
-#     return redirect('/photos/'+picture_id)
-
 def get_pics(filepath):
     # responds to url requests by sending the file to the requestor
     if not 'MyWebsite_user_id' in session.keys():
         return redirect('/')
     if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
-        return redirect('/danger')    
-    # print(filepath)
+        return redirect('/danger')
+    user=User.get_one(session['MyWebsite_user_id'])
+    # SECURITY CHECK:  VERIFY THAT FILEPATH REQUEST BELONGS TO REQUESTING USER
+    if (os.path.dirname(filepath)!=user.email) and (os.path.dirname(filepath)!='thumbnails/'+user.email):
+         print('Filepath DANGER:',filepath)
+         return redirect('/danger')
     return send_from_directory('UserFiles', filepath)
 
 def view_pic(picture_id):
@@ -201,6 +199,9 @@ def delete_pic(picture_id):
     if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
         return redirect('/danger')    
     pic=Picture.query.get(picture_id)
+    # SECURITY CHECK:  VERIFY THAT PICTURE BELONGS TO REQUESTING USER
+    if pic.user.id!=session['MyWebsite_user_id']:
+        return redirect('/danger')
     print("deleting: ",pic)
     if os.path.exists('UserFiles/'+pic.file_path):
         os.remove('UserFiles/'+pic.file_path)
@@ -225,6 +226,10 @@ def create_album():
     return redirect ('/dashboard')
 
 def delete_album():
+    if not 'MyWebsite_user_id' in session.keys():
+        return redirect('/')
+    if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
+        return redirect('/danger')
     print ("Delete Album: ",request.form['json'])
     deleting_album=json.loads(request.form['json'])
     album_id=deleting_album['album_id']

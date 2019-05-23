@@ -97,7 +97,7 @@ $(function(){
         $(this).html('<input type="text" name="album_description" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
     });
     $("#albums").on("focusout","input",function(){
-        console.log("input loose focus")
+        // console.log("input loose focus")
         var name= $(this).attr("name");
         var update_info={
             "album_id" : $(this).attr("album_id")

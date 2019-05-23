@@ -1,15 +1,19 @@
 <!-- This is a partial. Yes, I know you can put them in their own dir, but this is the only one, so I'm not.-->
-<div id="search_results" class="album d-inline-block shadow p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="Click to make this album the target">
-    <p class="font-weight-bold album_name" album_id="{{album.id}}" title="Change the name to make this album permanent (Double click to change)">Search Results</p>
-    <ul class="sortable" album_id="{{album.id}}">
+<div id="search_results" class="album d-inline-block shadow p-3 mr-3 mb-3" album_id="{{album.id}}" title="Search Results">
+    <p class="font-weight-bold album_name pl-2 border" album_id="{{album.id}}" title="This album is Temporary.  Change the name to make this album permanent (double click to change).">Search Results</p>
+    <ul class="sortable list-inline" album_id="{{album.id}}">
     {% if album.pictures|length==0 %}
         <h2>No matches</h2>
     {% else %}
+        <li class="album-menu list-inline-item m-1 align-middle"> 
+            <!-- <input type="checkbox" name="" id=""> Playlist <br><br>  -->
+            <button class="delete-album-btn btn btn-sm btn-outline-danger" album_id="{{album.id}}" title="Delete this album.">Del</button>
+        </li>
         {% for picture in album.pictures %}
             <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
         {% endfor %}
     {% endif %}
     </ul>
-    <p class="album_description" album_id="{{album.id}}" title="Double click to change">{{album.description}}</p>
+    <p class="album_description pl-2 border" album_id="{{album.id}}" title="Album Description:  Double click to change">{{album.description}}</p>
 </div>
 

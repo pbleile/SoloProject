@@ -112,7 +112,10 @@
                     <div class="album d-inline-block shadow-lg p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="{{album_title}}&#13;Click and hold to move">
                         <p class="font-weight-bold album_name pl-2 border" album_id="{{album.id}}" title="Album Name:  Double click to change">{{album.name}}</p>
                         <ul class="sortable list-inline" album_id="{{album.id}}">
-                            <li class="album-menu list-inline-item m-1 align-middle"> <input type="checkbox" name="" id=""> Playlist <br><br> <button class="delete-album-btn btn btn-sm btn-outline-danger" album_id="{{album.id}}">Del</button></li>
+                            <li class="album-menu list-inline-item m-1 align-middle"> 
+                                <!-- <input type="checkbox" name="" id=""> Playlist <br><br>  -->
+                                <button class="delete-album-btn btn btn-sm btn-outline-danger" album_id="{{album.id}}" title="Delete this album.">Del</button>
+                            </li>
                             {% for picture in album.pictures %}
                             <li class="list-inline-item ui-state-default m-1 shadow" picture_id="{{picture.id}}" title="Click to View&#13;Click hold to move"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                             {% endfor %}

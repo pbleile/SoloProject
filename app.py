@@ -7,11 +7,9 @@ if __name__=="__main__":
 
 # To Do
 # Required
-# 1. Test Handling duplicate file names
-# 5. Replace literals with constants
+# 1. Replace literals with constants
 # Optional (features)
 # 2. Drag zoomed in pic around inside div
 # 3. Choose Copy or Move pictures between albums without re-upload
 # 4. Play album (also set playback speed, turn photo name/descripton on/off).
 # 5. Delete pictures from dashboard page.
-# 6. Delete an album from the dashboard page.

@@ -24,7 +24,7 @@
 
 .album li{
     background: none;
-    border: 1px solid;
+    /* border: 1px solid; */
 }
 
 .active_album{
@@ -32,7 +32,7 @@
 }
 .ui-sortable-placeholder{
     vertical-align: top;
-    outline:1 px solid;
+    /* outline:1 px solid; */
 }
 
 .sortable{
@@ -41,14 +41,14 @@
 }
 #albums{
     display:inline-block;
-    outline:1px solid;
+    /* outline:1px solid; */
     margin-left: 75px;
 }
 
 #side_nav{
     width: 75px;
     height: 150px;
-    outline: 1px solid;
-    display: inline-block;
+    /* outline: 1px solid; */
+    /* display: inline-block; */
     position: fixed;
 }

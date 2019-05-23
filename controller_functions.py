@@ -224,6 +224,13 @@ def create_album():
         pass
     return redirect ('/dashboard')
 
+def delete_album():
+    print ("Delete Album: ",request.form['json'])
+    deleting_album=json.loads(request.form['json'])
+    album_id=deleting_album['album_id']
+    Album.delete(album_id)
+    return redirect ('/dashboard')
+
 def update_profile():
     if not 'MyWebsite_user_id' in session.keys():
         return redirect('/')
@@ -250,31 +257,27 @@ def reorder_album():
         return redirect('/')
     if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
         return redirect('/danger')    
-    # print("form:", request.form['json'])
-    # print(request.form['album_id'])
     python_obj = json.loads(request.form['json'])
-    # print("jSON:", json.loads(request.form['json']))
-    # print(python_obj["album_id"])
-    # print(python_obj["ordering"])
-    # print("jSON:", request.get_json(force=True))
     album_order=Album_to_Pic()
     # This section to be replaced by album_order.set_order(python_obj)
     old_order=album_order.get_order(python_obj["album_id"])
     album=Album.query.get(python_obj["album_id"])
+    # Remove pictures from album if they are no longer in the list
     for picture_id in old_order:
         if picture_id not in python_obj["ordering"]:
             picture=Picture.query.get(picture_id)
             album.pictures.remove(picture)
             album_order.commit()
+    # Rewrite all the rank values in the db table using the index value of the list
     for rank,picture_id in enumerate(python_obj["ordering"],1):
         # print(rank, picture_id)
-
-        picture=Picture.query.get(picture_id)
-        if picture not in album.pictures:
-            Album.add_pic(user=None,picture=picture,album_id=album.id)
-
-        record=album_order.get_one(python_obj["album_id"],picture_id)
-        record.rank=rank
+        if picture_id.isnumeric():
+            # if the list contains a picture that is not in the album, then add it
+            picture=Picture.query.get(picture_id)
+            if picture not in album.pictures:
+                Album.add_pic(user=None,picture=picture,album_id=album.id)
+            record=album_order.get_one(python_obj["album_id"],picture_id)
+            record.rank=rank
     album_order.commit()
     # print(album_order.get_order(python_obj["album_id"]))
     return redirect('/dashboard')

@@ -4,6 +4,7 @@ from flask import flash
 from config import bcrypt, EMAIL_REGEX,db
 from sqlalchemy.sql import func, and_,or_
 from sqlalchemy.ext.automap import automap_base
+import os
 
 def rankDefault(context):
     return context.get_current_parameters()['picture_id']
@@ -33,6 +34,9 @@ class Album_to_Pic:
     def get_by_album(self,album_id):
         # Return a list of pictures (Picture) belonging to an album, ordered by rank (int).
         return db.session.query(Picture).join(self.table,self.table.picture_id==Picture.id).filter(self.table.album_id==album_id).order_by(self.table.rank).all()
+    def get_by_picture(self,picture_id):
+        # Return a list of albums that contain a picture.
+        return db.session.query(Album).join(self.table,self.table.album_id==Album.id).filter(self.table.picture_id==picture_id).all()
     def get_one(self,album_id,picture_id):
         # Return one record using the composite primary key (user_id + album_id).
         return db.session.query(self.table).filter(self.table.album_id==album_id).filter(self.table.picture_id==picture_id).first()
@@ -46,13 +50,27 @@ class Album_to_Pic:
             picture_id_order.append(record.picture_id)
         return picture_id_order
     def set_order(self, ordering_dict):
-        # Ordering_list is a dict containing a list of picture_id in the desired order.
+        # ordering_dict is a dict containing "album_id" and "ordering"; a list of picture_id in the desired order.
         # eg. {'album_id': '2', 'ordering': ['6', '2', '1', '3', '5', '4', '7', '8', '9', '10']}
+        old_order=self.get_order(ordering_dict["album_id"])
+        album=Album.query.get(ordering_dict["album_id"])
+        # Remove pictures from album if they are no longer in the list
+        for picture_id in old_order:
+            if picture_id not in ordering_dict["ordering"]:
+                picture=Picture.query.get(picture_id)
+                album.pictures.remove(picture)
+                db.session.commit()
+        # Rewrite all the rank values in the db table using the index value of the list
         for index,picture_id in enumerate(ordering_dict["ordering"],1):
             # print(index, picture_id)
-            record=album_order.get_one(ordering_dict["album_id"],picture_id)
-            record.rank=index
-            db.session.commit()
+            if picture_id.isnumeric():
+                # if the list contains a picture that is not in the album, then add it
+                picture=Picture.query.get(picture_id)
+                if picture not in album.pictures:
+                    Album.add_pic(user=None,picture=picture,album_id=album.id)
+                record=self.get_one(ordering_dict["album_id"],picture_id)
+                record.rank=index
+        db.session.commit()
 
 class Picture(db.Model):
     __tablename__="pictures"
@@ -65,6 +83,14 @@ class Picture(db.Model):
     updated_at = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
     in_albums=db.relationship('Album',secondary=album_has_pictures)
     user=db.relationship('User', foreign_keys=[user_id],  backref=db.backref("pictures",cascade="all,delete-orphan"))
+    def delete_from_disk(self):
+        if os.path.exists('UserFiles/'+self.file_path):
+            os.remove('UserFiles/'+self.file_path)
+            if os.path.exists('UserFiles/thumbnails'+self.file_path):
+                os.remove('UserFiles/thumbnails/'+self.file_path)
+            print("delete success: ", self)
+        else:
+            print("delete fail: ",self)
     @classmethod
     def new(cls,user_id,file_path,name):
         """
@@ -159,6 +185,7 @@ class Album(db.Model):
             db.session.add(album)
             db.session.commit()
         else:
+            # Clear search_results album of previous results
             for picture in album.pictures:
                 # Remove picture from search_results album, but not from db.
                 album.pictures.remove(picture)
@@ -168,6 +195,19 @@ class Album(db.Model):
             album.pictures.append(picture)
         db.session.commit()
         return album
+    @classmethod
+    def delete(cls,album_id):
+        album=cls.query.get(album_id)
+        db.session.delete(album)
+        db.session.commit()
+        # Although album has been removed from the database, it still exists in this scope
+        album_to_pic=Album_to_Pic()
+        for picture in album.pictures:
+            # Search the many-many table to see if this picture is in another album
+            in_other_albums=album_to_pic.get_by_picture(picture.id)
+            if not in_other_albums:
+                picture.delete_from_disk()
+                Picture.delete(picture.id)
 
 
 class User(db.Model):

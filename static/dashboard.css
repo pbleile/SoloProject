@@ -3,11 +3,10 @@
     /* outline:1px solid; */
     vertical-align: top;
 }
-/* h1{
-    outline:1px solid;
-} */
+
 .img-thumbnail{
     height: 100px;
+    padding:0px;
 }
 .dropdown-menu{
     width: 300px;
@@ -19,22 +18,37 @@
 .album p{
     min-width: 100px;
     min-height: 24px;
-    /* outline: 1px solid; */
-    /* color:white; */
-    /* background-color: rgba(0, 0, 0, 0.45); */
     background-image: linear-gradient(to right, silver,white,silver);
-    /* border:1px solid grey; */
     border-radius: 5px;
-    /* box-shadow: 10px 10px 5px #888888; */
 }
+
+.album li{
+    background: none;
+    border: 1px solid;
+}
+
 .active_album{
     background-image: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(163, 105, 58));
 }
 .ui-sortable-placeholder{
     vertical-align: top;
+    outline:1 px solid;
 }
 
 .sortable{
     min-height: 100px;
     min-width: 100px;
+}
+#albums{
+    display:inline-block;
+    outline:1px solid;
+    margin-left: 75px;
+}
+
+#side_nav{
+    width: 75px;
+    height: 150px;
+    outline: 1px solid;
+    display: inline-block;
+    position: fixed;
 }

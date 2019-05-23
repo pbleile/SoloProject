@@ -1,20 +1,24 @@
 $(function(){
     // Select the active album, where picture uploads go (also for viewing)
     $('#albums').on('click','.album',function(){
-        console.log("album click")
+        set_active_album(this);
+    });
+    
+    function set_active_album(album){
+        console.log("album click: "+$(album).attr("album_id"));
         // remove active_album class from wherever it is
         $('.active_album').attr('title','Click to make this album the target.')
         $('.active_album').removeClass('active_album');
-        // add active_album class to this
-        $(this).addClass('active_album');
-        $(this).attr('title','Active album: Uploads will appear here.');
+        // add active_album class to this album
+        $(album).addClass('active_album');
+        $(album).attr('title','Active album: Uploads will appear here.');
         // set the file upload target album to the active album's id, update the upload labeling
-        $("#active_album_input").val($(this).attr("album_id"));
+        $("#active_album_input").val($(album).attr("album_id"));
         let file_count=$('.custom-file-input')[0].files.length;
         if (file_count){
-            $("#file_upload_label").text(file_count+" to upload to "+$(this).children('.album_name').text());
+            $("#file_upload_label").text(file_count+" to upload to "+$(album).children('.album_name').text());
         } else {
-            $("#file_upload_label").text("Upload to "+$(this).children('.album_name').text());
+            $("#file_upload_label").text("Upload to "+$(album).children('.album_name').text());
         }
         // tell the server that the active album has changed
         $.ajax({
@@ -23,18 +27,18 @@ $(function(){
             async: false,
             timeout:5000,
             url:"/set_active_album",
-            data: { json: JSON.stringify({album_id: $(this).attr("album_id")})}
+            data: { json: JSON.stringify({album_id: $(album).attr("album_id")})}
         });
-    });
+    }
 
-    // Update upload files label if the file selector is used.
+    // Update the file_upload_label if the file selector is used.
     $('.custom-file-input').change(function(){
         console.log($(this)[0].files.length);
         //$("label[for='inputGroupFile03']").text($(this)[0].files.length+' files selected');
         $("#file_upload_label").text($(this)[0].files.length+" to upload to "+$(".active_album").children('.album_name').text());
     });
 
-    // Move albums around by dragging
+    // Move albums around by dragging (with jQueryUI)
     $("#albums").sortable({
         update: function( event, ui ) {
             console.log("New album ordering");
@@ -53,23 +57,31 @@ $(function(){
         }
       });
 
-    // Move pictures around with by dragging
+    // Move pictures around with by dragging (with jQueryUI)
     // be careful with this if using ajax to add new albums
-    $( ".sortable" ).sortable({connectWith:".sortable"})  // can move between albums
+    // can move between albums
+    $( ".sortable" ).sortable(
+        {
+        //cancel: ".album-menu",
+        items: "li:not(.album-menu)",
+        connectWith:".sortable"
+        }
+    );
     // $( ".sortable" ).sortable().disableSelection(); // cannot move between albums
+
+    // Tell the server about the album's new picture ordering after they've been moved
     $( "#albums" ).on( "sortupdate",".sortable", function( event, ui ) {
         console.log("New picture ordering");
-        //var sorted = $(this).sortable( "serialize", {key: "pic", attribute: "pictrue_id" } );
         // console.log("picture sorted");
         var sortedIDs = $(this ).sortable( "toArray",{attribute: "picture_id"} );
-        console.log($(this).attr("album_id"));
-        console.log(sortedIDs);
+        // console.log($(this).attr("album_id"));
+        // console.log(sortedIDs);
         var album_order={
             album_id: $(this).attr("album_id"),
             ordering: sortedIDs
         }
-        console.log(album_order);
-        console.log(JSON.stringify(album_order));
+        // console.log(album_order);
+        // console.log(JSON.stringify(album_order));
         $.ajax({
             method:"POST",
             url:"/reorder_album",
@@ -116,5 +128,37 @@ $(function(){
         .always(function(){
         });
         return false;
+    });
+
+    // Delete Album confirm dialog
+    $("#albums").on("click",".delete-album-btn",function(e){
+        e.stopPropagation();
+        console.log("delete btn click")
+        $("#deleteConfirmModal").val($(this).attr("album_id"));
+        $("#deleteConfirmModal").modal('show');
+    });
+
+    // Handle Album deletion
+    $('#deleteConfirmModal').on('click', '.btn',function (e) {
+        console.log("delete modal close");
+        console.log("album ID: "+$("#deleteConfirmModal").val());
+        console.log("modal result: "+$(this).attr("modal-result"));
+        $("#deleteConfirmModal").modal("toggle");
+        if ($(this).attr("modal-result")=="yes"){
+            let album=$(".album[album_id='"+$("#deleteConfirmModal").val()+"']");
+            console.log($(album).attr("class"));
+            // If the album being deleted is also the active album, make another album active
+            if ($(album).hasClass("active_album")){
+                $(album).remove();
+                set_active_album($("#albums .album:first-child"));
+            } else {
+                $(album).remove();
+            }
+            $.ajax({
+                method: "POST",
+                url: "/delete_album",
+                data: { json: JSON.stringify({album_id: $("#deleteConfirmModal").val()})}
+            });
+        }
     });
 });

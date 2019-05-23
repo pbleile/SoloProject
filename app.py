@@ -8,12 +8,8 @@ if __name__=="__main__":
 # To Do
 # Required
 # 1. Test Handling duplicate file names
-# 2. Enable security
-# 3. Fatten Models and Slim contollers
-# 4. Modularize
 # 5. Replace literals with constants
 # Optional (features)
-# 1. Album ordering on page
 # 2. Drag zoomed in pic around inside div
 # 3. Choose Copy or Move pictures between albums without re-upload
 # 4. Play album (also set playback speed, turn photo name/descripton on/off).

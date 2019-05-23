@@ -32,13 +32,14 @@
             <img class="nav-thumbnail" src="../static/camera-icon-th.png" alt="PhotoBomb! logo">
             <h1 class="d-inline-block">PhotoBomb!</h1>
             <!-- Search -->
-            <form id="picture_search" action="/search" method="POST" class="input-group-btn d-inline-block" title="Seach for title or description">
+            <form id="picture_search" action="/search" method="POST" class="input-group-btn d-inline-block" title="Seach by title or description">
                 <div class="input-group">
-                    <input class="ml-5 b4-s rounded-left border-right-0" type="text" name="search_str">
-                    <button class="btn btn-primary rounded-right" type="submit">Search</button>
+                    <input class="form-control" type="text" name="search_str">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary rounded-right" type="submit">Search</button>
+                    </div>
                 </div>
             </form>
-            <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light"> -->
             <!-- Create New Album Drop Down -->
             <div class="dropdown d-inline">
                 <button class="btn shadow dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -60,8 +61,6 @@
             </div>
             <!-- File Upload Form -->
             <form class="d-inline-block" action="/upload" method="POST" enctype = "multipart/form-data">
-                <!-- <input type="file" name="new_pic" multiple="true" accept="image/*">
-                <input class="btn shadow" type="submit" value="Upload"> -->
                 <input type="hidden" name="active_album" value="{{albums[0].user.active_album}}" id="active_album_input">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
@@ -73,7 +72,6 @@
                     </div>
                 </div>
             </form>
-            <!-- <img class="nav-thumbnail" src="{{profile_pic}}" alt="User profile pic"> -->
             <!-- Change User Details Form -->
             <div class="dropdown d-inline" title="Click for Profile/Logout">
                 <img class="nav-thumbnail dropdown-toggle" src="{{profile_pic}}" alt="User profile pic" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -95,7 +93,6 @@
                     <a class="dropdown-item" href="/logout">Logout</a>
                 </div>
             </div>
-            <!-- </nav> -->
         </div>
 
         <hr>
@@ -106,23 +103,44 @@
             {% for album in albums %}
                 {% if album.name!="search_results"%}
                     {% set active_album="" %}
-                    {% if album.user.active_album==album.id: %}
+                    {% if album.user.active_album==album.id %}
                         {% set active_album="active_album" %}
                         {% set album_title="Active album: Uploads will appear here." %}
                     {% else %}
                         {% set album_title="Click to make this album the target" %}
                     {% endif %}
-                    <div class="album d-inline-block shadow-lg p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="{{album_title}}">
+                    <div class="album d-inline-block shadow-lg p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="{{album_title}}&#13;Click and hold to move">
                         <p class="font-weight-bold album_name pl-2 border" album_id="{{album.id}}" title="Album Name:  Double click to change">{{album.name}}</p>
-                        <ul class="sortable" album_id="{{album.id}}">
+                        <ul class="sortable list-inline" album_id="{{album.id}}">
+                            <li class="album-menu list-inline-item m-1 align-middle"> <input type="checkbox" name="" id=""> Playlist <br><br> <button class="delete-album-btn btn btn-sm btn-outline-danger" album_id="{{album.id}}">Del</button></li>
                             {% for picture in album.pictures %}
-                            <li class="d-inline-block ui-state-default" picture_id="{{picture.id}}" title="Click to View"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
+                            <li class="list-inline-item ui-state-default m-1 shadow" picture_id="{{picture.id}}" title="Click to View&#13;Click hold to move"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                             {% endfor %}
                         </ul>
                         <p class="album_description pl-2 border" album_id="{{album.id}}" title="Album Description:  Double click to change">{{album.description}}</p>
                     </div>
                 {% endif %}
             {% endfor %}
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalTitle">DELETE ALBUM?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Really?  Lobotomize your visual memories like a nursing home vegetable?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal" modal-result="no">OH GOD NO!</button>
+                    <button type="button" class="btn btn-danger" modal-result="yes">Pfft!  What evs...</button>
+                </div>
+            </div>
         </div>
     </div>
 </body>

@@ -22,7 +22,7 @@ app.add_url_rule('/update_profile',view_func=update_profile,methods=["POST"])
 
 app.add_url_rule('/upload',view_func=upload,methods=["POST"])
 app.add_url_rule('/UserFiles/<path:filepath>',view_func=get_pics)
-app.add_url_rule('/photos/<picture_id>',view_func=view_pic)
+app.add_url_rule('/photos/<picture_id>&<album_id>',view_func=view_pic)
 app.add_url_rule('/delete/<picture_id>',view_func=delete_pic)
 app.add_url_rule('/create_album',view_func=create_album,methods=["POST"])
 app.add_url_rule('/delete_album',view_func=delete_album,methods=["POST"])

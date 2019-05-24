@@ -117,7 +117,7 @@
                                 <button class="delete-album-btn btn btn-sm btn-outline-danger" album_id="{{album.id}}" title="Delete this album.">Del</button>
                             </li>
                             {% for picture in album.pictures %}
-                            <li class="list-inline-item ui-state-default m-1 shadow" picture_id="{{picture.id}}" title="Click to View&#13;Click hold to move"><a href="/photos/{{picture.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
+                            <li class="list-inline-item ui-state-default m-1 shadow" picture_id="{{picture.id}}" title="Click to View&#13;Click hold to move"><a href="/photos/{{picture.id}}&{{album.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                             {% endfor %}
                         </ul>
                         <p class="album_description pl-2 border" album_id="{{album.id}}" title="Album Description:  Double click to change">{{album.description}}</p>

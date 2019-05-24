@@ -174,22 +174,23 @@ def get_pics(filepath):
          return redirect('/danger')
     return send_from_directory('UserFiles', filepath)
 
-def view_pic(picture_id):
+def view_pic(picture_id,album_id):
     # render page that displays the picture in large format with details
     if not 'MyWebsite_user_id' in session.keys():
         return redirect('/')
     if not User.is_logged_in(session['MyWebsite_user_id'],session['login_session']):
-        return redirect('/danger')    
-    user=User.get_one(session['MyWebsite_user_id'])
+        return redirect('/danger')
+    # SECURITY CHECK:  VERIFY THAT PICTURE BELONGS TO REQUESTING USER
     pic=Picture.query.get(picture_id)
-    # print(pic)
+    if pic.user.id!=session['MyWebsite_user_id']:
+        return redirect('/danger')
     # Open image file for reading (binary mode)
     f = open('UserFiles/'+pic.file_path, 'rb')
     # Return Exif tags
     tags = exifread.process_file(f)
     # print(tags)
     # find prev and next pics in the album
-    album=Album.query.get(user.active_album)
+    album=Album.query.get(album_id)
     return render_template('view.html',album=album, picture_id=picture_id,picture=pic,exif_data=tags)
 
 def delete_pic(picture_id):

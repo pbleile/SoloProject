@@ -8,6 +8,7 @@ if __name__=="__main__":
 # To Do
 # Required
 # 1. Replace literals with constants
+# 2. Update AJAX sync call to non-depricated method
 # Optional (features)
 # 2. Drag zoomed in pic around inside div
 # 3. Choose Copy or Move pictures between albums without re-upload

@@ -1,12 +1,18 @@
 $(function(){
     // Select the active album, where picture uploads go (also for viewing)
-    $('#albums').on('click','.album',function(){
-        set_active_album(this);
+    $('#albums').on('click','.album',function(e){
+        if (! $(e.target).is("p")){
+            // console.log($(e.target).html());
+            set_active_album(this);
+        }
     });
     
     function set_active_album(album){
         console.log("album click: "+$(album).attr("album_id"));
         // remove active_album class from wherever it is
+        if ($('.active_album').attr("album_id")==$(album).attr("album_id")){
+            return;
+        }
         $('.active_album').attr('title','Click to make this album the target.')
         $('.active_album').removeClass('active_album');
         // add active_album class to this album
@@ -23,9 +29,6 @@ $(function(){
         // tell the server that the active album has changed
         $.ajax({
             method:"POST",
-            //need synch here because View needs the correct active album or we get errors
-            async: false,
-            timeout:5000,
             url:"/set_active_album",
             data: { json: JSON.stringify({album_id: $(album).attr("album_id")})}
         });
@@ -90,11 +93,19 @@ $(function(){
     });
 
     // Change album names and descriptions
-    $("#albums").on( "dblclick",".album_name", function(){
-        $(this).html('<input type="text" name="album_name" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
+    $("#albums").on( "dblclick",".album_name", function(e){
+        e.stopPropagation();
+        $(this).addClass("input-group-sm");
+        $(this).removeClass("pl-2");
+        $(this).html('<input type="text" name="album_name" class="form-control" id="currently_editing" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
+        $("#currently_editing").focus();
     });
-    $("#albums").on( "dblclick",".album_description", function(){
-        $(this).html('<input type="text" name="album_description" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
+    $("#albums").on( "dblclick",".album_description", function(e){
+        e.stopPropagation();
+        $(this).addClass("input-group-sm");
+        $(this).removeClass("pl-2");
+        $(this).html('<input type="text" name="album_description" class="form-control" id="currently_editing" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
+        $("#currently_editing").focus();
     });
     $("#albums").on("focusout","input",function(){
         // console.log("input loose focus")
@@ -109,6 +120,8 @@ $(function(){
             data: {json: JSON.stringify(update_info)}
         })
         .done(function(resp){});
+        $(this).parent().removeClass("input-group-sm");
+        $(this).parent().addClass("pl-2");
         $(this).parent().html($(this).val());
     });
 
@@ -133,7 +146,7 @@ $(function(){
     // Delete Album confirm dialog
     $("#albums").on("click",".delete-album-btn",function(e){
         e.stopPropagation();
-        console.log("delete btn click")
+        console.log("delete btn click");
         $("#deleteConfirmModal").val($(this).attr("album_id"));
         $("#deleteConfirmModal").modal('show');
     });

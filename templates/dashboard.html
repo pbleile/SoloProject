@@ -48,7 +48,7 @@
                 <div class="dropdown-menu" >
                     <form class="px-4 py-3" action="/create_album" method="POST">
                         <div class="form-group">
-                            <label for="new_album">New Album Name</label>
+                            <label for="album_name">New Album Name</label>
                             <input type="text" name="name" class="form-control" id="album_name" placeholder="What you want to call it..." >
                         </div>
                         <div class="form-group">
@@ -109,18 +109,18 @@
                     {% else %}
                         {% set album_title="Click to make this album the target" %}
                     {% endif %}
-                    <div class="album d-inline-block shadow-lg p-3 mr-3 mb-3 {{active_album}}" album_id="{{album.id}}" title="{{album_title}}&#13;Click and hold to move">
-                        <p class="font-weight-bold album_name pl-2 border" album_id="{{album.id}}" title="Album Name:  Double click to change">{{album.name}}</p>
-                        <ul class="sortable list-inline" album_id="{{album.id}}">
+                    <div class="album d-inline-block shadow-lg p-3 mr-3 mb-3 {{active_album}}" data-album_id="{{album.id}}" title="{{album_title}}&#10;Click and hold to move">
+                        <p class="font-weight-bold album_name pl-2 border" data-album_id="{{album.id}}" title="Album Name:  Double click to change">{{album.name}}</p>
+                        <ul class="sortable list-inline" data-album_id="{{album.id}}">
                             <li class="album-menu list-inline-item m-1 align-middle"> 
                                 <!-- <input type="checkbox" name="" id=""> Playlist <br><br>  -->
-                                <button class="delete-album-btn btn btn-sm btn-outline-danger" album_id="{{album.id}}" title="Delete this album.">Del</button>
+                                <button class="delete-album-btn btn btn-sm btn-outline-danger" data-album_id="{{album.id}}" title="Delete this album.">Del</button>
                             </li>
                             {% for picture in album.pictures %}
-                            <li class="list-inline-item ui-state-default m-1 shadow" picture_id="{{picture.id}}" title="Click to View&#13;Click hold to move"><a href="/photos/{{picture.id}}&{{album.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
+                            <li class="list-inline-item ui-state-default m-1 shadow" data-picture_id="{{picture.id}}" title="Click to View&#10;Click hold to move"><a href="/photos/{{picture.id}}&{{album.id}}"><img class="img-thumbnail album_pic" src="/UserFiles/thumbnails/{{picture.file_path}}" alt="{{picture.name}}"></a></li>
                             {% endfor %}
                         </ul>
-                        <p class="album_description pl-2 border" album_id="{{album.id}}" title="Album Description:  Double click to change">{{album.description}}</p>
+                        <p class="album_description pl-2 border" data-album_id="{{album.id}}" title="Album Description:  Double click to change">{{album.description}}</p>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -140,8 +140,8 @@
                     Really?  Lobotomize your visual memories like a nursing home vegetable?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal" modal-result="no">OH GOD NO!</button>
-                    <button type="button" class="btn btn-danger" modal-result="yes">Pfft!  What evs...</button>
+                    <button type="button" class="btn btn-success" data-dismiss="modal" data-modal-result="no">OH GOD NO!</button>
+                    <button type="button" class="btn btn-danger" data-modal-result="yes">Pfft!  What evs...</button>
                 </div>
             </div>
         </div>

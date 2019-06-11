@@ -8,9 +8,9 @@ $(function(){
     });
     
     function set_active_album(album){
-        console.log("album click: "+$(album).attr("album_id"));
+        console.log("album click: "+$(album).attr("data-album_id"));
         // remove active_album class from wherever it is
-        if ($('.active_album').attr("album_id")==$(album).attr("album_id")){
+        if ($('.active_album').attr("data-album_id")==$(album).attr("data-album_id")){
             return;
         }
         $('.active_album').attr('title','Click to make this album the target.')
@@ -19,7 +19,7 @@ $(function(){
         $(album).addClass('active_album');
         $(album).attr('title','Active album: Uploads will appear here.');
         // set the file upload target album to the active album's id, update the upload labeling
-        $("#active_album_input").val($(album).attr("album_id"));
+        $("#active_album_input").val($(album).attr("data-album_id"));
         let file_count=$('.custom-file-input')[0].files.length;
         if (file_count){
             $("#file_upload_label").text(file_count+" to upload to "+$(album).children('.album_name').text());
@@ -30,7 +30,7 @@ $(function(){
         $.ajax({
             method:"POST",
             url:"/set_active_album",
-            data: { json: JSON.stringify({album_id: $(album).attr("album_id")})}
+            data: { json: JSON.stringify({album_id: $(album).attr("data-album_id")})}
         });
     }
 
@@ -45,7 +45,7 @@ $(function(){
     $("#albums").sortable({
         update: function( event, ui ) {
             console.log("New album ordering");
-            var sortedIDs = $(this ).sortable( "toArray",{attribute: "album_id"} );
+            var sortedIDs = $(this ).sortable( "toArray",{attribute: "data-album_id"} );
             console.log(sortedIDs);
             sortedIDs.reverse();
             console.log(sortedIDs);
@@ -76,11 +76,11 @@ $(function(){
     $( "#albums" ).on( "sortupdate",".sortable", function( event, ui ) {
         console.log("New picture ordering");
         // console.log("picture sorted");
-        var sortedIDs = $(this ).sortable( "toArray",{attribute: "picture_id"} );
-        // console.log($(this).attr("album_id"));
+        var sortedIDs = $(this ).sortable( "toArray",{attribute: "data-picture_id"} );
+        // console.log($(this).attr("data-album_id"));
         // console.log(sortedIDs);
         var album_order={
-            album_id: $(this).attr("album_id"),
+            album_id: $(this).attr("data-album_id"),
             ordering: sortedIDs
         }
         // console.log(album_order);
@@ -97,21 +97,21 @@ $(function(){
         e.stopPropagation();
         $(this).addClass("input-group-sm");
         $(this).removeClass("pl-2");
-        $(this).html('<input type="text" name="album_name" class="form-control" id="currently_editing" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
+        $(this).html('<input type="text" name="album_name" class="form-control" id="currently_editing" data-album_id="'+$(this).attr("data-album_id")+'" value="'+$(this).text()+'">')
         $("#currently_editing").focus();
     });
     $("#albums").on( "dblclick",".album_description", function(e){
         e.stopPropagation();
         $(this).addClass("input-group-sm");
         $(this).removeClass("pl-2");
-        $(this).html('<input type="text" name="album_description" class="form-control" id="currently_editing" album_id="'+$(this).attr("album_id")+'" value="'+$(this).text()+'">')
+        $(this).html('<input type="text" name="album_description" class="form-control" id="currently_editing" data-album_id="'+$(this).attr("data-album_id")+'" value="'+$(this).text()+'">')
         $("#currently_editing").focus();
     });
     $("#albums").on("focusout","input",function(){
         // console.log("input loose focus")
         var name= $(this).attr("name");
         var update_info={
-            "album_id" : $(this).attr("album_id")
+            "album_id" : $(this).attr("data-album_id")
         }
         update_info[name]=$(this).val();
         $.ajax({
@@ -147,7 +147,7 @@ $(function(){
     $("#albums").on("click",".delete-album-btn",function(e){
         e.stopPropagation();
         console.log("delete btn click");
-        $("#deleteConfirmModal").val($(this).attr("album_id"));
+        $("#deleteConfirmModal").val($(this).attr("data-album_id"));
         $("#deleteConfirmModal").modal('show');
     });
 
@@ -155,10 +155,10 @@ $(function(){
     $('#deleteConfirmModal').on('click', '.btn',function (e) {
         console.log("delete modal close");
         console.log("album ID: "+$("#deleteConfirmModal").val());
-        console.log("modal result: "+$(this).attr("modal-result"));
+        console.log("modal result: "+$(this).attr("data-modal-result"));
         $("#deleteConfirmModal").modal("toggle");
-        if ($(this).attr("modal-result")=="yes"){
-            let album=$(".album[album_id='"+$("#deleteConfirmModal").val()+"']");
+        if ($(this).attr("data-modal-result")=="yes"){
+            let album=$(".album[data-album_id='"+$("#deleteConfirmModal").val()+"']");
             console.log($(album).attr("class"));
             // If the album being deleted is also the active album, make another album active
             if ($(album).hasClass("active_album")){

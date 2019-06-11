@@ -61,7 +61,7 @@
         });
     </script>
 
-    <title>PhotBomb!</title>
+    <title>PhotoBomb!</title>
 </head>
 <body>
     <div id="wrapper">
@@ -75,21 +75,21 @@
             {% if album.pictures.index(picture)>0 %}
             <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}&{{album.id}}" title="Previous Photo"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
             {% else %}
-            <a href="#" disabled=true title="Start of Album"><<</i></a>
+            <a class="disabled" title="Start of Album"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
             {% endif %}
 
             {% if album.pictures.index(picture)< album.pictures|length-1 %}
                 <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}&{{album.id}}" title="Next Photo"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
             {% else %}
-                <a href="#" disabled=true title="End of Album">>></a>
+                <a  class="disabled" title="End of Album"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
             {% endif %}
         </div>
         <hr>
         <div class="side_nav">
             {% if album.pictures.index(picture)>0 %}
-            <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}&{{album.id}}" title="Previous Photo"></i><<</a>
+            <a href="/photos/{{album.pictures[album.pictures.index(picture)-1].id}}&{{album.id}}" title="Previous Photo"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
             {% else %}
-            <a href="#" disabled=true title="Start of Album"><<</a>
+            <a  class="disabled" title="Start of Album"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
             {% endif %}
         </div>
         <div id="img_panel" class="d-inline-block align-top">
@@ -97,9 +97,9 @@
         </div>
         <div class="side_nav">
             {% if album.pictures.index(picture)< album.pictures|length-1 %}
-                <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}&{{album.id}}" title="Next Photo"></i>>></a>
+                <a href="/photos/{{album.pictures[album.pictures.index(picture)+1].id}}&{{album.id}}" title="Next Photo"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
             {% else %}
-                <a href="#" disabled=true title="End of Album">>></a>
+                <a class="disabled" title="End of Album"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
             {% endif %}
         </div>
         <div id="info_panel" class="d-inline-block align-top">
